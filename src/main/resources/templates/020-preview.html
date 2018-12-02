@@ -88,7 +88,7 @@
 
 						//scroll log at bottom
 						let log = this.$refs.logPre;
-						log.scrollTop = log.scrollHeight;
+                        if (log) log.scrollTop = log.scrollHeight;
 					})
 				},
 
