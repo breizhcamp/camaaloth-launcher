@@ -19,7 +19,9 @@ class NageruSrv(private val props: CamaalothProps, private val msgTpl: SimpMessa
     private val logDateFormater = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
 
     fun start(recordingDir: Path, stompDest: String) {
-        val cmd = listOf("/bin/bash", props.nageru.startScript, "-r", recordingDir.toAbsolutePath().toString())
+        val startScript = Paths.get(props.nageru.startScript).toAbsolutePath().toString()
+
+        val cmd = listOf("/bin/bash", startScript, "-r", recordingDir.toAbsolutePath().toString())
         val logFile = recordingDir.resolve(logDateFormater.format(LocalDateTime.now()) + "_nageru.log")
         val runDir = Paths.get(props.nageru.themeDir)
 

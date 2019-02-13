@@ -67,7 +67,7 @@ class TalkSrv(private val objectMapper: ObjectMapper, private val props: Camaalo
         currentTalk = t
 
         val dirName = LocalDate.now().toString() + " - " + t.talk + " - " + t.speakers.joinToString(" -") { it.name }
-        recordingPath = Paths.get(props.recordingDir, dirName.replace('/', '-'))
+        recordingPath = Paths.get(props.recordingDir, dirName.replace('/', '-')).toAbsolutePath()
 
         createCurrentTalkDirAndCopyInfos(zipFile)
         extractImagesToThemeDir(zipFile)

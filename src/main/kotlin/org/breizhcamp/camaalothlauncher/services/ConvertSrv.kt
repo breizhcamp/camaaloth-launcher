@@ -84,7 +84,7 @@ class ConvertSrv(private val talkSrv: TalkSrv, private val msgTpl: SimpMessaging
                 }
             } catch (e: UncheckedIOException) {
                 //ffmpeg cut the connection violently, we discard the exception
-                logger.info { "FFMpeg has cut the progress \"a l'arrache\"" }
+                logger.info { "FFMpeg has terminated the progress \"a l'arrache\"" }
             }
         }
     }
