@@ -2,12 +2,12 @@ package org.breizhcamp.camaalothlauncher.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.breizhcamp.camaalothlauncher.CamaalothProps
+import org.breizhcamp.camaalothlauncher.dto.State
 import org.breizhcamp.camaalothlauncher.dto.TalkSession
 import org.springframework.stereotype.Service
 import java.io.File
 import java.io.FileNotFoundException
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption.COPY_ATTRIBUTES
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
@@ -20,12 +20,6 @@ import java.util.zip.ZipFile
  */
 @Service
 class TalkSrv(private val objectMapper: ObjectMapper, private val props: CamaalothProps) {
-
-    /** Selected user talk read from JSON file */
-    private var currentTalk: TalkSession? = null
-
-    /** Path designing recording dir for [currentTalk] */
-    var recordingPath: Path? = null
 
     /**
      * @return the talk informations (and logo) read from the zip [zipFileName]
@@ -62,31 +56,30 @@ class TalkSrv(private val objectMapper: ObjectMapper, private val props: Camaalo
     }
 
     /** Define current talk session after reading zip [zipFile] */
-    fun setCurrentTalkFromFile(zipFile: String): TalkSession {
+    fun setCurrentTalkFromFile(zipFile: String, state: State): TalkSession {
         val t = readTalkSession(zipFile, false)
-        currentTalk = t
+        state.currentTalk = t
 
         val dirName = LocalDate.now().toString() + " - " + t.talk + " - " + t.speakers.joinToString(" -") { it.name }
-        recordingPath = Paths.get(props.recordingDir, dirName.replace('/', '-')).toAbsolutePath()
+        state.recordingPath = Paths.get(props.recordingDir, dirName.replace('/', '-')).toAbsolutePath()
 
-        createCurrentTalkDirAndCopyInfos(zipFile)
+        createCurrentTalkDirAndCopyInfos(zipFile, state)
         extractImagesToThemeDir(zipFile)
 
         return t
     }
 
-    fun getCurrentTalk(): TalkSession? = currentTalk
-
     /** Create directory for current dir */
-    fun createCurrentTalkDirAndCopyInfos(zipFile: String) {
-        val preview = previewDir() ?: return
+    fun createCurrentTalkDirAndCopyInfos(zipFile: String, state: State) {
+        val recording = state.recordingPath ?: return
+        val preview = state.previewDir() ?: return
 
         if (Files.notExists(preview)) {
             Files.createDirectories(preview)
         }
 
         val zip = Paths.get(zipFile)
-        val dest = preview.parent.resolve("infos.ug.zip")
+        val dest = recording.resolve("infos.ug.zip")
         Files.copy(zip, dest, REPLACE_EXISTING, COPY_ATTRIBUTES)
     }
 
@@ -114,8 +107,6 @@ class TalkSrv(private val objectMapper: ObjectMapper, private val props: Camaalo
             }
         }
     }
-
-    fun previewDir() = recordingPath?.resolve("preview")
 
     private fun convertToTalk(zip: ZipFile, entry: ZipEntry?): TalkSession {
         zip.getInputStream(entry).use {
