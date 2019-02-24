@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <style>
+        #cards li {
+            font-style: italic;
+        }
+
+        #cards .card-title {
+            font-weight: bold;
+        }
+
+        .jumbotron p {
+            text-align: center;
+            font-size: 150%;
+        }
+    </style>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div th:replace="stepper :: stepper(step = 1)"></div>
+
+    <div class="row">
+        <div class="col-sm jumbotron jumbo-light">
+            <p>AMPHI C - Mercredi 20 mars 2019</p>
+        </div>
+    </div>
+
+    <div id="cards">
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Du fer à souder à la manette : une console de jeux à partir d'un microcontrolleur</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">10h00</h6>
+
+                        <ul class="list-unstyled">
+                            <li>Nicolas de Loof</li>
+                            <li>Équipe BreizhCamp</li>
+                        </ul>
+
+                        <a href="#" class="btn btn-primary">Filmer ce talk</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

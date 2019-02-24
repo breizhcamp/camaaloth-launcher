@@ -2,22 +2,27 @@ package org.breizhcamp.camaalothlauncher.controller
 
 import org.breizhcamp.camaalothlauncher.dto.State
 import org.breizhcamp.camaalothlauncher.services.TalkSrv
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 
+/**
+ * Display views in meetup flavour
+ */
+@Profile("!breizhcamp")
 @Controller
-class HomeCtrl(private val talkSrv: TalkSrv, private val state: State) {
+class MeetupViewCtrl(private val talkSrv: TalkSrv, private val state: State) {
 
     @GetMapping("/")
     fun home() : String {
-        return "000-home"
+        return "meetup/000-home"
     }
 
     @GetMapping("/010-talk-choice")
     fun talkChoix() : String {
-        return "010-talk-choice"
+        return "meetup/010-talk-choice"
     }
 
     @GetMapping("/020-preview")
@@ -26,7 +31,7 @@ class HomeCtrl(private val talkSrv: TalkSrv, private val state: State) {
 
         val talk = state.currentTalk ?: return "redirect:010-talk-choice"
         model.addAttribute("talk", talk)
-        return "020-preview"
+        return "meetup/020-preview"
     }
 
     @GetMapping("/030-live")
@@ -34,7 +39,7 @@ class HomeCtrl(private val talkSrv: TalkSrv, private val state: State) {
         val talk = state.currentTalk ?: return "redirect:010-talk-choice"
 
         model.addAttribute("talk", talk)
-        return "030-live"
+        return "meetup/030-live"
     }
 
     @GetMapping("/040-export")
@@ -42,6 +47,6 @@ class HomeCtrl(private val talkSrv: TalkSrv, private val state: State) {
         val talk = state.currentTalk ?: return "redirect:010-talk-choice"
 
         model.addAttribute("talk", talk)
-        return "040-export"
+        return "meetup/040-export"
     }
 }
