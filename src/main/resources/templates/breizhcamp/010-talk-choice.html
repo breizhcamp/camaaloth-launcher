@@ -11,10 +11,19 @@
             font-weight: bold;
         }
 
+        #cards .card {
+            height: 100%;
+        }
+
+        #cards .row {
+            margin-bottom: 10px;
+        }
+
         .jumbotron p {
             text-align: center;
             font-size: 150%;
         }
+
     </style>
 </head>
 
@@ -24,24 +33,31 @@
 
     <div class="row">
         <div class="col-sm jumbotron jumbo-light">
-            <p>AMPHI C - Mercredi 20 mars 2019</p>
+            <p th:text="|${room} - ${#temporals.format(curDate, 'EEEE dd MMM yyyy')}|">Amphi C - Mercredi 20 mars 2019</p>
         </div>
     </div>
 
-    <div id="cards">
-        <div class="row">
-            <div class="col-sm-3">
+    <div id="cards" th:with="colCount=${4}">
+        <div class="row" th:each="r : ${#numbers.sequence(0, talks.size(), colCount)}">
+            <div class="col-sm-3" th:each="c : ${#numbers.sequence(0, colCount - 1)}" th:if="${r + c &lt; talks.size()}" th:with="t=${talks.get(r + c)}">
                 <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Du fer à souder à la manette : une console de jeux à partir d'un microcontrolleur</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">10h00</h6>
+                    <div class="card-body d-flex align-content-between flex-wrap">
+                        <div>
+                            <h5 class="card-title" th:text="${t.talk}">Du fer à souder à la manette : une console de jeux à partir d'un microcontrolleur</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">
+                                <span th:text="${#temporals.format(t.startDate(), 'HH:mm')}">10:00</span>
+                                &rarr;
+                                <span th:text="${#temporals.format(t.endDate(), 'HH:mm')}">10h30</span>
+                            </h6>
 
-                        <ul class="list-unstyled">
-                            <li>Nicolas de Loof</li>
-                            <li>Équipe BreizhCamp</li>
-                        </ul>
+                            <ul class="list-unstyled">
+                                <li th:each="s : ${t.speakers}" th:text="${s.name}">Nicolas de Loof</li>
+                            </ul>
+                        </div>
 
-                        <a href="#" class="btn btn-primary">Filmer ce talk</a>
+                        <div>
+                            <a href="#" th:href="|020-preview?id=${t.id}|" class="btn btn-primary">Filmer ce talk</a>
+                        </div>
                     </div>
                 </div>
             </div>
