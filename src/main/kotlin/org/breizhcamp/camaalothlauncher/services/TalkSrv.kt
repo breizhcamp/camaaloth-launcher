@@ -56,7 +56,7 @@ class TalkSrv(private val objectMapper: ObjectMapper, private val props: Camaalo
     }
 
     /** Define current talk session after reading zip [zipFile] */
-    fun setCurrentTalkFromFile(zipFile: String, state: State): TalkSession {
+    fun setCurrentTalkFromFile(zipFile: String, state: State) {
         val t = readTalkSession(zipFile, false)
         state.currentTalk = t
 
@@ -65,12 +65,10 @@ class TalkSrv(private val objectMapper: ObjectMapper, private val props: Camaalo
 
         createCurrentTalkDirAndCopyInfos(zipFile, state)
         extractImagesToThemeDir(zipFile)
-
-        return t
     }
 
     /** Create directory for current dir */
-    fun createCurrentTalkDirAndCopyInfos(zipFile: String, state: State) {
+    private fun createCurrentTalkDirAndCopyInfos(zipFile: String, state: State) {
         val recording = state.recordingPath ?: return
         val preview = state.previewDir() ?: return
 
@@ -84,7 +82,7 @@ class TalkSrv(private val objectMapper: ObjectMapper, private val props: Camaalo
     }
 
     /** Extract all png in [zipFile] into themes/images dir */
-    fun extractImagesToThemeDir(zipFile: String) {
+    private fun extractImagesToThemeDir(zipFile: String) {
         val imagesDir = Paths.get(props.nageru.themeDir, "images")
         val imgDirFile = imagesDir.toFile()
 

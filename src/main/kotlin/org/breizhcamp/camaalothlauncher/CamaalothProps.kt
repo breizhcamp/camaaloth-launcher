@@ -29,8 +29,11 @@ class CamaalothProps {
         /** Location of local shedule.json file */
         var scheduleFile = "src/test/resources/schedule.json"
 
-        /** For test purpose, set the date to filter talk instead of current date */
+        /** For test purpose, set the date (YYYY-MM-DD) to filter talk instead of current date */
         var overriddenDate: String? = null
+
+        /** For test purpose, set the time (HH:MM) to filter talk instead of current time */
+        var overriddenTime: String? = null
     }
 
 }

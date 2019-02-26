@@ -4,16 +4,23 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.breizhcamp.camaalothlauncher.CamaalothProps
 import org.breizhcamp.camaalothlauncher.dto.Speaker
+import org.breizhcamp.camaalothlauncher.dto.State
 import org.breizhcamp.camaalothlauncher.dto.TalkConf
 import org.breizhcamp.camaalothlauncher.dto.TalkSession
 import org.springframework.stereotype.Service
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.time.format.DateTimeFormatter
 
 /**
  * Manage TalkConf (read...)
  */
 @Service
 class TalkConfSrv(private val objectMapper: ObjectMapper, private val props: CamaalothProps) {
+
+    private val dayFormat = DateTimeFormatter.ofPattern("dd")
+    private val timeFormat = DateTimeFormatter.ofPattern("HH-mm")
 
     /** @return All talks for the room specified in configuration */
     fun listTalksInCurrentRoom(): List<TalkSession> {
@@ -25,11 +32,31 @@ class TalkConfSrv(private val objectMapper: ObjectMapper, private val props: Cam
                 .map { talkConfToSession(it) }
     }
 
+    /**
+     * Define current talk from this id
+     * TODO: check if we can do something better with [TalkSrv.setCurrentTalkFromFile]
+     *
+     * @param id Id of the talk to define
+     * @param state State containing the current talk if found
+     */
+    fun setCurrentTalk(id: Int, state: State) {
+        val t = getTalk(id) ?: return
+        state.currentTalk = talkConfToSession(t)
+
+        val recordingPath = buildVideoDirName(t)
+        state.recordingPath = Paths.get(props.recordingDir, recordingPath).toAbsolutePath()
+
+        val preview = state.previewDir() ?: return
+        if (Files.notExists(preview)) {
+            Files.createDirectories(preview)
+        }
+    }
+
     /** @return talk with [id] or null */
-    fun getTalk(id: Int): TalkSession? {
+    private fun getTalk(id: Int): TalkConf? {
         val talks: List<TalkConf> = objectMapper.readValue(File(props.breizhcamp.scheduleFile))
 
-        return talks.firstOrNull { it.id == id }?.let(this::talkConfToSession)
+        return talks.firstOrNull { it.id == id }
     }
 
     private fun talkConfToSession(conf: TalkConf): TalkSession {
@@ -44,6 +71,17 @@ class TalkConfSrv(private val objectMapper: ObjectMapper, private val props: Cam
                 endTime = conf.eventEnd.toLocalTime(),
                 name = "BreizhCamp"
         )
+    }
+
+    /**
+     * @return the directory name for a specific talk at the same format of the video uploader
+     */
+    private fun buildVideoDirName(talk: TalkConf): String {
+        val name = talk.name.replace(Regex("[\\\\/:*?\"<>|]"), "-")
+        val speakers = talk.speakers.replace(Regex("[\\\\/:*?\"<>|]"), "-")
+
+        return (dayFormat.format(talk.eventStart) + "." + talk.venue + "." + timeFormat.format(talk.eventStart)
+                + " - " + name + " (" + speakers + ") - " + talk.id)
     }
 
 }

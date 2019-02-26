@@ -7,6 +7,7 @@
 
 	<style>
 		.stdlog { max-height: 500px }
+		.font-90 { font-size: 90% }
 	</style>
 </head>
 
@@ -26,6 +27,16 @@
 					<span th:text="${s.name}">John Snow</span>
 				</span>
 			</p>
+		</div>
+		<div class="col-sm-1">
+			<div class="text-muted font-italic font-90">
+				<div th:if="${talk.startTime}">
+					<i class="far fa-play-circle"></i> <span th:text="${#temporals.format(talk.startDate(), 'HH:mm')}">10h30</span>
+				</div>
+				<div th:if="${talk.endTime}">
+					<i class="far fa-stop-circle"></i> <span th:text="${#temporals.format(talk.endDate(), 'HH:mm')}">11h30</span>
+				</div>
+			</div>
 		</div>
 	</div>
 
