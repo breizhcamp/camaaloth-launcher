@@ -25,6 +25,13 @@ class TalkConfSrv(private val objectMapper: ObjectMapper, private val props: Cam
                 .map { talkConfToSession(it) }
     }
 
+    /** @return talk with [id] or null */
+    fun getTalk(id: Int): TalkSession? {
+        val talks: List<TalkConf> = objectMapper.readValue(File(props.breizhcamp.scheduleFile))
+
+        return talks.firstOrNull { it.id == id }?.let(this::talkConfToSession)
+    }
+
     private fun talkConfToSession(conf: TalkConf): TalkSession {
         val speakers = conf.speakers.split(",").map { Speaker(it.trimEnd()) }
 
