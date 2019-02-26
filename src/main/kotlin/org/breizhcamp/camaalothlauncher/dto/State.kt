@@ -8,6 +8,12 @@ import java.nio.file.Path
  */
 @Component
 class State {
+    enum class Step {
+        CHOICE, PREVIEW, LIVE, EXPORT
+    }
+
+    var step = Step.CHOICE
+
     /** Selected user talk read from JSON file */
     var currentTalk: TalkSession? = null
 
