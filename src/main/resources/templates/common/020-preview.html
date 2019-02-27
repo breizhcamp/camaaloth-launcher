@@ -7,38 +7,13 @@
 
 	<style>
 		.stdlog { max-height: 500px }
-		.font-90 { font-size: 90% }
 	</style>
 </head>
 
 <body>
 <div layout:fragment="content">
 	<div th:replace="stepper :: stepper(step = 2)"></div>
-
-	<div class="row">
-		<div class="col-sm-1">
-			<a th:href="@{/010-talk-choice}" class="btn btn-info"><i class="fas fa-arrow-left"></i></a>
-		</div>
-		<div class="col-sm-10 text-center">
-			<h2 th:text="${talk.talk}"></h2>
-			<p class="text-muted font-italic">
-				<span th:each="s : ${talk.speakers}">
-					<span th:if="${!sStat.first}"> - </span>
-					<span th:text="${s.name}">John Snow</span>
-				</span>
-			</p>
-		</div>
-		<div class="col-sm-1">
-			<div class="text-muted font-italic font-90">
-				<div th:if="${talk.startTime}">
-					<i class="far fa-play-circle"></i> <span th:text="${#temporals.format(talk.startDate(), 'HH:mm')}">10h30</span>
-				</div>
-				<div th:if="${talk.endTime}">
-					<i class="far fa-stop-circle"></i> <span th:text="${#temporals.format(talk.endDate(), 'HH:mm')}">11h30</span>
-				</div>
-			</div>
-		</div>
-	</div>
+	<div th:replace="talk_header :: talk_header(talk = ${talk}, link = @{/010-talk-choice})"></div>
 
 	<div id="vue">
 

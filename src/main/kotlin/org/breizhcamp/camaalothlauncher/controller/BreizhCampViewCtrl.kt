@@ -2,8 +2,7 @@ package org.breizhcamp.camaalothlauncher.controller
 
 import org.breizhcamp.camaalothlauncher.CamaalothProps
 import org.breizhcamp.camaalothlauncher.dto.State
-import org.breizhcamp.camaalothlauncher.dto.State.Step.CHOICE
-import org.breizhcamp.camaalothlauncher.dto.State.Step.PREVIEW
+import org.breizhcamp.camaalothlauncher.dto.State.Step.*
 import org.breizhcamp.camaalothlauncher.services.StateSrv
 import org.breizhcamp.camaalothlauncher.services.TalkConfSrv
 import org.springframework.context.annotation.Profile
@@ -53,6 +52,15 @@ class BreizhCampViewCtrl(private val props: CamaalothProps, private val talkConf
 
         stateSrv.save(PREVIEW, state)
         return "common/020-preview"
+    }
+
+    @GetMapping("/030-live")
+    fun live(model: Model) : String {
+        val talk = state.currentTalk ?: return "redirect:010-talk-choice"
+        model.addAttribute("talk", talk)
+
+        stateSrv.save(LIVE, state)
+        return "common/030-live"
     }
 
 }

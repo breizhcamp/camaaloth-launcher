@@ -44,7 +44,7 @@ class MeetupViewCtrl(private val talkSrv: TalkSrv, private val state: State, pri
 
         stateSrv.save(LIVE, state)
         model.addAttribute("talk", talk)
-        return "meetup/030-live"
+        return "common/030-live"
     }
 
     @GetMapping("/040-export")
