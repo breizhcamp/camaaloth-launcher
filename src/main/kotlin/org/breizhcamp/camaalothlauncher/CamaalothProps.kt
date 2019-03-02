@@ -10,6 +10,10 @@ class CamaalothProps {
 
     /** directory containing recording, each in sub-directory */
     var recordingDir = "videos"
+
+    /** Location of script called for copying file */
+    var copyScript = "src/test/resources/copy-script.sh"
+
     val nageru = Nageru()
     val breizhcamp = BreizhCamp()
 
@@ -18,7 +22,6 @@ class CamaalothProps {
         var startScript = "src/test/resources/start-script.sh"
         /** location of nageru theme */
         var themeDir = "videos/theme"
-
     }
 
     /** Configurations used when BreizhCamp flavour is on */
