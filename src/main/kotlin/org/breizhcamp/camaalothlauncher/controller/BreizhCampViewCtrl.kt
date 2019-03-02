@@ -3,6 +3,7 @@ package org.breizhcamp.camaalothlauncher.controller
 import org.breizhcamp.camaalothlauncher.CamaalothProps
 import org.breizhcamp.camaalothlauncher.dto.State
 import org.breizhcamp.camaalothlauncher.dto.State.Step.*
+import org.breizhcamp.camaalothlauncher.services.CopyThread
 import org.breizhcamp.camaalothlauncher.services.StateSrv
 import org.breizhcamp.camaalothlauncher.services.TalkConfSrv
 import org.springframework.context.annotation.Profile
@@ -19,7 +20,7 @@ import java.time.LocalTime
 @Profile("breizhcamp")
 @Controller
 class BreizhCampViewCtrl(private val props: CamaalothProps, private val talkConfSrv: TalkConfSrv,
-                         private val state: State, private val stateSrv: StateSrv) {
+                         private val state: State, private val stateSrv: StateSrv, private val copyThread: CopyThread) {
 
     @GetMapping("/")
     fun home() : String {
@@ -61,6 +62,14 @@ class BreizhCampViewCtrl(private val props: CamaalothProps, private val talkConf
 
         stateSrv.save(LIVE, state)
         return "common/030-live"
+    }
+
+    @GetMapping("/050-copy")
+    fun copy() : String {
+//        copyThread.addFileToCopy(CopyCmd(Paths.get("/home/athomazo/videos/Audio Video Sync Test 60 FPS.mp4"),
+//                Paths.get("test"),
+//                Paths.get("/home/athomazo/workspace/breizhcamp/camaaloth/camaaloth-launcher/videos/21.Amphi C.17-35 - Minio, une nouvelle approche du stockage objet - promesses, enthousiasme et désillusions (Sébastien BLAISOT) - 5123")))
+        return "common/050-copy"
     }
 
 }
