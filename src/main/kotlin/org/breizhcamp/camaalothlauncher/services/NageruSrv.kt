@@ -1,6 +1,5 @@
 package org.breizhcamp.camaalothlauncher.services
 
-import mu.KotlinLogging
 import org.breizhcamp.camaalothlauncher.CamaalothProps
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
@@ -8,8 +7,6 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
-private val logger = KotlinLogging.logger {}
 
 /**
  * Service for handling nageru (start/stop...)
