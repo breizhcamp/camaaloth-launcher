@@ -59,9 +59,16 @@ class BreizhCampViewCtrl(private val props: CamaalothProps, private val talkConf
     fun live(model: Model) : String {
         val talk = state.currentTalk ?: return "redirect:010-talk-choice"
         model.addAttribute("talk", talk)
+        model.addAttribute("forceExport", true)
 
         stateSrv.save(LIVE, state)
         return "common/030-live"
+    }
+
+    @GetMapping("/040-export")
+    fun export() : String {
+        //no export in BreizhCamp configuration, go direct into copy step
+        return "redirect:050-copy"
     }
 
     @GetMapping("/050-copy")

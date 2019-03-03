@@ -22,7 +22,7 @@
 	<div id="vue">
 
 		<div class="row mb-3">
-			<div class="col-sm text-center" v-if="!firstRun">
+			<div class="col-sm text-center" v-if="!firstRun && files.length == 0">
 				<button class="btn btn-primary btn-lg" @click="start()">Démarrer l'enregistrement</button>
 			</div>
 			<div class="col-sm text-center" v-else>
@@ -31,7 +31,7 @@
 
 
 			<div class="col-sm text-center" v-if="files.length > 0">
-				<a class="btn btn-outline-primary btn-lg" th:href="@{/010-talk-choice}">Enchainer avec un nouveau talk</a>
+				<a class="btn btn-outline-primary btn-lg" th:if="${!forceExport}" th:href="@{/010-talk-choice}">Enchainer avec un nouveau talk</a>
 				<button class="btn btn-primary btn-lg" @click="exportTalk()">Exporter le talk</button>
 			</div>
 		</div>

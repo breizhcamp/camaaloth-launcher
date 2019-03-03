@@ -17,7 +17,7 @@ class ExportCtrl(private val state: State, private val convertSrv: ConvertSrv) {
     @PostMapping("/start")
     fun start(): Duration {
         val recordingPath = state.recordingPath ?: return Duration.ZERO
-        return convertSrv.startConvert(recordingPath, state.filesToConvert)
+        return convertSrv.startConvert(recordingPath, state.filesToExport)
     }
 
     /**

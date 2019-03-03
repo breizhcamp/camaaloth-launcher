@@ -20,8 +20,8 @@ class State {
     /** Path designing recording dir for [currentTalk] */
     var recordingPath: Path? = null
 
-    /** After recording, list of file to convert into MP4 */
-    var filesToConvert: List<Path> = emptyList()
+    /** After recording, list of file to convert into MP4 or to copy */
+    var filesToExport: List<Path> = emptyList()
 
     fun previewDir() = recordingPath?.resolve("preview")
 }

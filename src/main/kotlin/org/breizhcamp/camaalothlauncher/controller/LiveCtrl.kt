@@ -44,6 +44,6 @@ class LiveCtrl(private val state: State, private val nageruSrv: NageruSrv, priva
     fun export(@RequestBody files: List<String>) {
         val recordingDir = state.recordingPath ?: throw IllegalStateException("Current talk not set")
 
-        state.filesToConvert = files.map { recordingDir.resolve(it) }
+        state.filesToExport = files.map { recordingDir.resolve(it) }
     }
 }

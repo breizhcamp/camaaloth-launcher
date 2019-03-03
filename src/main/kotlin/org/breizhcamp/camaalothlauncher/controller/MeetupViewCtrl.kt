@@ -41,9 +41,10 @@ class MeetupViewCtrl(private val talkSrv: TalkSrv, private val state: State, pri
     @GetMapping("/030-live")
     fun live(model: Model) : String {
         val talk = state.currentTalk ?: return "redirect:010-talk-choice"
+        model.addAttribute("talk", talk)
+        model.addAttribute("forceExport", false)
 
         stateSrv.save(LIVE, state)
-        model.addAttribute("talk", talk)
         return "common/030-live"
     }
 
