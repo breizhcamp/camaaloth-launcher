@@ -51,12 +51,17 @@ class CopyThread(props: CamaalothProps, private val msgTpl: SimpMessagingTemplat
         val src = copyCmd.src
         if (src.fileName.toString() == "/nonexistant" || !Files.exists(src)) return
 
-        val dest = copyCmd.dest.toString()
+        val srcdir = src.parent.parent.toAbsolutePath().toString() //retrieving root directory of all videos
+        val srcfile = src.subpath(src.nameCount - 2, src.nameCount).toString() //extracting dirname and video file
+        val dest = copyCmd.destFile.toString()
 
-        val cmd = listOf("/bin/bash", copyScript, src.toAbsolutePath().toString(), dest)
+        val cmd = mutableListOf("/bin/bash", copyScript, srcdir, srcfile, dest)
+        copyCmd.destServer?.let { cmd.add(it) }
+
         val logFile = copyCmd.logDir.resolve(logDateFormater.format(LocalDateTime.now()) + "_copy.log")
         val runDir = src.parent
 
-        LongCmdRunner("copy", cmd, runDir, logFile, msgTpl, "/050-copy-out").start()
+        //we "run()" the class because we're already in a dedicated thread and want to copy file by file
+        LongCmdRunner("copy", cmd, runDir, logFile, msgTpl, "/050-copy-out").run()
     }
 }

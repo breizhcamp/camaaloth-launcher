@@ -44,10 +44,6 @@
                 connectToWS() {
                     ws.sub('/050-copy-out', msg => {
                         let body = msg.body
-                        if (body === '---- NEW STREAM ----') {
-                            this.log = []
-                        }
-
                         this.log.push(body)
 
                         //limit number of lines

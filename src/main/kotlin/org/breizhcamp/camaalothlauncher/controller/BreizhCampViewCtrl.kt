@@ -1,6 +1,7 @@
 package org.breizhcamp.camaalothlauncher.controller
 
 import org.breizhcamp.camaalothlauncher.CamaalothProps
+import org.breizhcamp.camaalothlauncher.dto.CopyCmd
 import org.breizhcamp.camaalothlauncher.dto.State
 import org.breizhcamp.camaalothlauncher.dto.State.Step.*
 import org.breizhcamp.camaalothlauncher.services.CopyThread
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
+import java.nio.file.Paths
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -73,9 +75,15 @@ class BreizhCampViewCtrl(private val props: CamaalothProps, private val talkConf
 
     @GetMapping("/050-copy")
     fun copy() : String {
-//        copyThread.addFileToCopy(CopyCmd(Paths.get("/home/athomazo/videos/Audio Video Sync Test 60 FPS.mp4"),
-//                Paths.get("test"),
-//                Paths.get("/home/athomazo/workspace/breizhcamp/camaaloth/camaaloth-launcher/videos/21.Amphi C.17-35 - Minio, une nouvelle approche du stockage objet - promesses, enthousiasme et désillusions (Sébastien BLAISOT) - 5123")))
+        val recordingPath = state.recordingPath ?: return "redirect:010-talk-choice"
+        val dest = Paths.get(props.breizhcamp.copyDir)
+
+        //add all exported file into copy queue
+        state.filesToExport.forEach { f ->
+            copyThread.addFileToCopy(CopyCmd(recordingPath.resolve(f), dest, recordingPath, props.breizhcamp.copyServer))
+        }
+        state.filesToExport = emptyList()
+
         return "common/050-copy"
     }
 

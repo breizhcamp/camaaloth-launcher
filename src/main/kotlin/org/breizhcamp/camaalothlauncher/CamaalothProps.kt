@@ -32,6 +32,12 @@ class CamaalothProps {
         /** Location of local shedule.json file */
         var scheduleFile = "src/test/resources/schedule.json"
 
+        /** Destination directory of copied files, on remote server if specified */
+        var copyDir = "/tmp"
+
+        /** Server string (user@host) used to copy file */
+        var copyServer: String? = null
+
         /** For test purpose, set the date (YYYY-MM-DD) to filter talk instead of current date */
         var overriddenDate: String? = null
 
