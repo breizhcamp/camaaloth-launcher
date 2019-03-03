@@ -45,6 +45,7 @@
 					<th scope="col">Fichier</th>
 					<th scope="col">Taille</th>
 					<th scope="col">Durée</th>
+					<th scope="col">Preview</th>
 				</tr>
 				</thead>
 				<tbody>
@@ -53,6 +54,7 @@
 					<td>{{ f.name }}</td>
 					<td>{{ f.size | formatBytes }}</td>
 					<td>{{ f.duration | duration().format('h [h] m [min] s [s]') }}</td>
+					<td><button class="btn btn-primary btn-sm" @click.stop="viewFile(f)"><i class="fas fa-play"></i></button></td>
 				</tr>
 				</tbody>
 			</table>
@@ -164,6 +166,12 @@
 					axios.get('/live/duration', { params: { file: file.path + '/' + file.name }}).then(res => {
 						Vue.set(file, 'duration', res.data)
 					})
+				},
+
+				viewFile(file) {
+					let params = new FormData()
+					params.append('file', file.name)
+					axios.post('/live/view', params)
 				},
 
 			},
