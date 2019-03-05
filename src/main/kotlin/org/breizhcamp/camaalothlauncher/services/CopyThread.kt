@@ -2,6 +2,7 @@ package org.breizhcamp.camaalothlauncher.services
 
 import org.breizhcamp.camaalothlauncher.CamaalothProps
 import org.breizhcamp.camaalothlauncher.dto.CopyCmd
+import org.breizhcamp.camaalothlauncher.dto.CopyFile
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
 import java.nio.file.Files
@@ -47,13 +48,18 @@ class CopyThread(props: CamaalothProps, private val msgTpl: SimpMessagingTemplat
         queue.addLast(CopyCmd(nonexistant, nonexistant, nonexistant))
     }
 
+    /**
+     * Retrieve the list of all file in waiting queue
+     */
+    fun listWaiting() : List<CopyFile> = queue.map { CopyFile(it.dirFileName, it.fileSize) }
+
     private fun copyFile(copyCmd: CopyCmd) {
         val src = copyCmd.src
         if (src.fileName.toString() == "/nonexistant" || !Files.exists(src)) return
 
         val srcdir = src.parent.parent.toAbsolutePath().toString() //retrieving root directory of all videos
-        val srcfile = src.subpath(src.nameCount - 2, src.nameCount).toString() //extracting dirname and video file
-        val dest = copyCmd.destFile.toString()
+        val srcfile = copyCmd.dirFileName //extracting dirname and video file
+        val dest = copyCmd.destDir.toString()
 
         val cmd = mutableListOf("/bin/bash", copyScript, srcdir, srcfile, dest)
         copyCmd.destServer?.let { cmd.add(it) }

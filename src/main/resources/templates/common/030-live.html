@@ -8,6 +8,7 @@
 	<script src="/webjars/moment-duration-format/2.2.2/lib/moment-duration-format.js"></script>
 	<script src="/webjars/vue/2.5.17/dist/vue.js" ></script>
 	<script src="/static/js/lib.js" th:src="@{/js/lib.js}"></script>
+	<script src="/static/js/filters.js" th:src="@{/js/filters.js}"></script>
 
 	<style>
 		.stdlog { max-height: 300px }
@@ -174,17 +175,6 @@
 					axios.post('/live/view', params)
 				},
 
-			},
-
-			filters: {
-				formatBytes (bytes, decimals) {
-					if (bytes === 0) return '0 o';
-					var k = 1024,
-						dm = decimals <= 0 ? 0 : decimals || 1,
-						sizes = ['o', 'Ko', 'Mo', 'Go', 'To', 'Po', 'Eo', 'Zo', 'Yo'],
-						i = Math.floor(Math.log(bytes) / Math.log(k));
-					return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-				}
 			}
 		})
 	</script>

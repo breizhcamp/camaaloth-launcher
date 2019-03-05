@@ -8,6 +8,7 @@
     <script src="/webjars/moment-duration-format/2.2.2/lib/moment-duration-format.js"></script>
     <script src="/webjars/vue/2.5.17/dist/vue.js" ></script>
     <script src="/static/js/lib.js" th:src="@{/js/lib.js}"></script>
+    <script src="/static/js/filters.js" th:src="@{/js/filters.js}"></script>
 
     <style>
         .stdlog { max-height: 500px }
@@ -19,6 +20,25 @@
     <div th:replace="stepper :: stepper(step = 5)"></div>
 
     <div id="vue">
+        <div class="row mb-3" v-if="files.length > 0">
+            <h4>Fichiers en attente de copie :</h4>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Fichier</th>
+                    <th scope="col">Taille</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="(f, idx) in files" :class="{ 'table-active': f.selected }" @click="selectFile(f)">
+                    <td>{{ idx + 1 }}</td>
+                    <td>{{ f.name }}</td>
+                    <td>{{ f.size | formatBytes }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
 
         <div class="row mb-3" v-if="log.length > 0">
             <div class="col-sm-12">
@@ -33,10 +53,12 @@
         new Vue({
             el: '#vue',
             data: {
-                log: []
+                log: [],
+                files: []
             },
 
             created() {
+                this.loadFiles()
                 this.connectToWS()
             },
 
@@ -54,6 +76,12 @@
                         //scroll log at bottom
                         let log = this.$refs.logPre;
                         if (log) log.scrollTop = log.scrollHeight;
+                    })
+                },
+
+                loadFiles() {
+                    axios.get('/copy/waiting').then(res => {
+                        this.files = res.data
                     })
                 }
             }

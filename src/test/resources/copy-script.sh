@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 export LANG=C
 
-if [[ "$#" -lt 4 ]]; then
+if [[ "$#" -lt 3 ]]; then
     echo "Usage example: ./copy-script.sh /media/video 2019_03_03-BreizhJUG/export.mp4 /media/dest [user@host]"
     exit 1
 fi

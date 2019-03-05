@@ -11,8 +11,8 @@ data class CopyCmd (
         /** Source file on local path */
         val src: Path,
 
-        /** Destination file that will be 2nd parameter of copy script */
-        val destFile: Path,
+        /** Destination directory that will be 2nd parameter of copy script */
+        val destDir: Path,
 
         /** Logging directory for script output */
         val logDir: Path,
@@ -23,7 +23,6 @@ data class CopyCmd (
         /** Size of source file */
         val fileSize: Long = if (Files.exists(src)) Files.size(src) else 0L,
 
-        /** Number of bytes already copied on destination */
-        var copied: Long = 0L
-
+        /** Keeping only the directory and filename that will be copied in destFile */
+        val dirFileName: String = src.subpath(src.nameCount - 2, src.nameCount).toString()
 )
