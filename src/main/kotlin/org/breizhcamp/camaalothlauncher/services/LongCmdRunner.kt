@@ -2,7 +2,6 @@ package org.breizhcamp.camaalothlauncher.services
 
 import mu.KotlinLogging
 import org.springframework.messaging.simp.SimpMessagingTemplate
-import java.io.BufferedWriter
 import java.io.InputStream
 import java.nio.file.Path
 
@@ -13,51 +12,49 @@ private val logger = KotlinLogging.logger {}
  */
 class LongCmdRunner(private val appName: String, private val cmd: List<String>, private val runDir: Path,
                     private val logFile: Path? = null, private val msgTpl: SimpMessagingTemplate? = null,
-                    private val stompDest: String? = null) : Thread("${appName}Runner") {
+                    private val stompDest: String? = null, private val stdCallback: ((String) -> Unit)?) : Thread("${appName}Runner") {
 
     override fun run() {
-        logger.info { "Starting ${appName} with command : [$cmd]" }
+        logger.info { "Starting $appName with command : [$cmd]" }
         val process = ProcessBuilder(cmd)
                 .redirectErrorStream(true)
                 .directory(runDir.toFile())
                 .start()
 
-        ReadStream(process.inputStream, "${appName}StdoutReader", logFile).start()
+        ReadStream(process.inputStream, "${appName}StdoutReader").start()
         val waitFor = process.waitFor()
 
-        val exitLog = "${appName} stopped and returned [$waitFor]"
+        val exitLog = "$appName stopped and returned [$waitFor]"
         logger.info { exitLog }
         sendMsg(msgTpl, stompDest, exitLog)
     }
 
     /** Read input stream and copy into Outputs */
-    private inner class ReadStream(private val inputStream: InputStream, name: String, private val logFile: Path?) : Thread(name) {
+    private inner class ReadStream(private val inputStream: InputStream, name: String) : Thread(name) {
 
         override fun run() {
             sendMsg(msgTpl, stompDest, "---- NEW STREAM ----")
-
-            if (logFile != null) {
-                logFile.toFile().bufferedWriter().use(this@ReadStream::readInput)
-            } else {
-                readInput(null)
-            }
-
+            readInput()
             sendMsg(msgTpl, stompDest, "---- END STREAM ----")
         }
 
-        private fun readInput(writer: BufferedWriter?) {
+        private fun readInput() {
+            val log = logFile?.toFile()?.bufferedWriter()
+
             inputStream.bufferedReader().forEachLine { line ->
-                logger.debug { "${appName} stdout : $line" }
+                logger.debug { "$appName stdout : $line" }
                 sendMsg(msgTpl, stompDest, line)
-                writer?.appendln(line)
-                writer?.flush()
+                log?.appendln(line)
+                log?.flush()
+                stdCallback?.invoke(line)
             }
         }
     }
 
     private fun sendMsg(msgTpl: SimpMessagingTemplate?, stompDest: String?, msg: Any) {
-        if (msgTpl == null || stompDest == null) return
-        msgTpl.convertAndSend(stompDest, msg)
+        val tpl = msgTpl ?: return
+        val dest = stompDest ?: return
+        tpl.convertAndSend(dest, msg)
     }
 
 }
