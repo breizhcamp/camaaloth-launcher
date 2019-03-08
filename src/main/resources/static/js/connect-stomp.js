@@ -29,7 +29,7 @@ ws = function ws() {
 
 		sub(chan, callback) {
 			if (stompClient.connected) {
-				stompClient.subscribe(chan. callback)
+				stompClient.subscribe(chan, callback)
 			} else {
 				toSub.push({ chan: chan, callback: callback })
 			}

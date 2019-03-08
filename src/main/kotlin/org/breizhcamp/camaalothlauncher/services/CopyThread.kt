@@ -78,7 +78,10 @@ class CopyThread(props: CamaalothProps, private val msgTpl: SimpMessagingTemplat
         //we "run()" the class because we're already in a dedicated thread and want to copy file by file
         LongCmdRunner("copy", cmd, runDir, logFile, msgTpl, "/050-copy-out", this::parseRsyncAndUpdateProgress).run()
 
-        progress.reset()
+        if (queue.isEmpty()) {
+            progress.reset()
+            sendProgress()
+        }
     }
 
     /**
@@ -101,6 +104,10 @@ class CopyThread(props: CamaalothProps, private val msgTpl: SimpMessagingTemplat
         progress.speed = speed.toBigDecimal().multiply(speedMultiplier.toBigDecimal()).toLong()
 
         progress.waitingSize = queue.map { it.fileSize }.sum()
+        sendProgress()
+    }
+
+    private fun sendProgress() {
         msgTpl.convertAndSend("/050-copy-progress", progress)
     }
 }

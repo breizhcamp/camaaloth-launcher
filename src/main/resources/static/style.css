@@ -10,39 +10,40 @@ body {
 	margin-bottom: 0;
 }
 
-.stepwizard-step p {
-	margin-top: 10px;
-}
-.stepwizard-row {
-	display: table-row;
-}
 .stepwizard {
-	display: table;
-	position: relative;
+	margin-bottom: 5px;
 }
-.stepwizard-row:before {
-	top: 15px;
-	bottom: 0;
-	position: absolute;
+
+.stepwizard:before {
+	top: 16px;
+	position: relative;
 	content: " ";
 	width: 100%;
 	height: 1px;
 	background-color: #ccc;
 	z-index: 0;
 }
-.stepwizard-step {
-	display: table-cell;
-	text-align: center;
-	position: relative;
+.stepwizard p {
+	margin: 3px 0 0 0;
 }
-.btn-circle {
-	width: 30px;
-	height: 30px;
+.stepwizard .col {
+	text-align: center;
+}
+.stepwizard .btn-circle {
+	width: 31px;
+	height: 31px;
 	text-align: center;
 	padding: 6px 0;
 	font-size: 12px;
 	line-height: 1.428571429;
 	border-radius: 15px;
+}
+
+.stepwizard .upload-time {
+	font-size: 80%;
+	opacity: 0;
+	max-height: 0;
+	transition: all 1s ease;
 }
 
 .font-90 { font-size: 90% }
