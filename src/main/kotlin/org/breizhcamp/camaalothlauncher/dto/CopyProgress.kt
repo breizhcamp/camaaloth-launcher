@@ -5,7 +5,7 @@ package org.breizhcamp.camaalothlauncher.dto
  */
 data class CopyProgress (
         /** Current coping file, null if no file is coping */
-        var current: CopyFile?,
+        var current: CopyFile? = null,
 
         /** Number of bytes copied on destination */
         var copied: Long = 0L,
@@ -13,6 +13,13 @@ data class CopyProgress (
         /** Transfer rate in byte/sec */
         var speed: Long = 0L,
 
-        /** Total size of files waiting in queue */
+        /** Total file size of files waiting in queue */
         var waitingSize: Long = 0L
-)
+) {
+        fun reset() {
+                current = null
+                copied = 0L
+                speed = 0L
+                waitingSize = 0L
+        }
+}

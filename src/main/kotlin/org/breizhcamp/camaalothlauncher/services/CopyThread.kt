@@ -3,6 +3,7 @@ package org.breizhcamp.camaalothlauncher.services
 import org.breizhcamp.camaalothlauncher.CamaalothProps
 import org.breizhcamp.camaalothlauncher.dto.CopyCmd
 import org.breizhcamp.camaalothlauncher.dto.CopyFile
+import org.breizhcamp.camaalothlauncher.dto.CopyProgress
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
 import java.nio.file.Files
@@ -23,6 +24,11 @@ class CopyThread(props: CamaalothProps, private val msgTpl: SimpMessagingTemplat
     private val queue = LinkedBlockingDeque<CopyCmd>()
     private var running = true
     private val copyScript = Paths.get(props.copyScript).toAbsolutePath().toString()
+
+    /** Current progress */
+    val progress = CopyProgress()
+
+    private val rsyncRegex = Regex("^\\s*([0-9,]+)\\s+[0-9]+%\\s+([0-9.]+)(.?B)/s.*$")
 
     override fun run() {
         while(running) {
@@ -67,7 +73,34 @@ class CopyThread(props: CamaalothProps, private val msgTpl: SimpMessagingTemplat
         val logFile = copyCmd.logDir.resolve(logDateFormater.format(LocalDateTime.now()) + "_copy.log")
         val runDir = src.parent
 
+        progress.current = CopyFile(srcfile, copyCmd.fileSize)
+
         //we "run()" the class because we're already in a dedicated thread and want to copy file by file
-        LongCmdRunner("copy", cmd, runDir, logFile, msgTpl, "/050-copy-out").run()
+        LongCmdRunner("copy", cmd, runDir, logFile, msgTpl, "/050-copy-out", this::parseRsyncAndUpdateProgress).run()
+
+        progress.reset()
+    }
+
+    /**
+     * Parse an update rsync line, update all progress object and send update in stomp queue.
+     * example of rsync line : 196,178 100%   77.92MB/s    0:00:00 (xfr#1, to-chk=0/2)
+     */
+    private fun parseRsyncAndUpdateProgress(line: String) {
+        val res = rsyncRegex.find(line) ?: return
+        val (bytes, speed, speedUnit) = res.destructured
+        progress.copied = bytes.replace(",", "").toLong()
+
+        val speedMultiplier = when(speedUnit) {
+            "B" -> 1
+            "kB" -> 1024
+            "MB" -> 1024 * 1024
+            "GB" -> 1024 * 1024 * 1024
+            else -> throw IllegalStateException("rsync speed unit [$speedUnit] is unknown")
+        }
+
+        progress.speed = speed.toBigDecimal().multiply(speedMultiplier.toBigDecimal()).toLong()
+
+        progress.waitingSize = queue.map { it.fileSize }.sum()
+        msgTpl.convertAndSend("/050-copy-progress", progress)
     }
 }
