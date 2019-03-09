@@ -21,7 +21,7 @@
 <body>
 <div layout:fragment="content">
 	<div th:replace="stepper :: stepper(step = 4)"></div>
-	<div th:replace="talk_header :: talk_header(talk = ${talk}, link = @{{/030-live})"></div>
+	<div th:replace="talk_header :: talk_header(talk = ${talk}, link = @{/030-live})"></div>
 
 	<div id="vue">
 		<div class="row mb-3">
