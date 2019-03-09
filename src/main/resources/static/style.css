@@ -47,3 +47,8 @@ body {
 }
 
 .font-90 { font-size: 90% }
+
+.pgbar {
+	height: 40px;
+	font-size: 25px;
+}
