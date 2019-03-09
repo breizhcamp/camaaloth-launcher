@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}">
+      layout:decorate="~{layout}" xmlns:v-bind="http://www.w3.org/1999/xhtml">
 <head>
     <script src="/webjars/axios/0.18.0/dist/axios.min.js"></script>
     <script src="/webjars/moment/2.24.0/min/moment-with-locales.min.js"></script>
@@ -11,7 +11,7 @@
     <script src="/static/js/filters.js" th:src="@{/js/filters.js}"></script>
 
     <style>
-        .stdlog { max-height: 500px }
+        .stdlog { max-height: 200px }
     </style>
 </head>
 
@@ -20,7 +20,43 @@
     <div th:replace="stepper :: stepper(step = 5)"></div>
 
     <div id="vue">
-        <div class="row mb-3" v-if="files.length > 0">
+        <div class="row mb-3 mt-4">
+            <div class="col text-center">
+                <h2 v-if="progress.current">Copie en cours...</h2>
+                <h2 v-if="!progress.current" class="pt-5 pb-3">Copie terminée</h2>
+            </div>
+        </div>
+
+        <div class="row mb-2 text-muted" v-if="progress.current">
+            <div class="col">
+                {{ progress.current.name }}
+            </div>
+
+            <div class="col-3 text-right">
+                <div>Temps restant estimé : {{ remaining }}</div>
+                <div>Taille : {{ progress.copied | formatBytes }} / {{ progress.current.size | formatBytes }}</div>
+            </div>
+        </div>
+
+        <div class="row mb-4" v-if="progress.current">
+            <div class="col">
+                <div class="progress pgbar">
+                    <div class="progress-bar" role="progressbar"
+                         v-bind:class="progressBarStyle" v-bind:style="{ width: progress.percent + '%' }" >
+                        {{progress.percent}}%
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col text-center">
+                <div><a th:href="@{/010-talk-choice}" class="btn btn-primary btn-lg">Relancer une captation</a></div>
+                <div class="font-italic font-90" v-if="progress.current">La copie continuera en arrière-plan</div>
+            </div>
+        </div>
+
+        <div class="row mb-3 mt-4" v-if="files.length > 0">
             <h4>Fichiers en attente de copie :</h4>
             <table class="table">
                 <thead>
@@ -40,7 +76,7 @@
             </table>
         </div>
 
-        <div class="row mb-3" v-if="log.length > 0">
+        <div class="row mb-3 mt-5" v-if="log.length > 0">
             <div class="col-sm-12">
 				<pre class="pre-scrollable stdlog" ref="logPre">
 {{log.join('\n')}}
@@ -50,11 +86,15 @@
     </div>
 
     <script>
+        moment.locale('fr')
+        Vue.use(vueMoment, { moment })
         new Vue({
             el: '#vue',
             data: {
                 log: [],
-                files: []
+                files: [],
+                progress: { current: null },
+                remaining: null
             },
 
             created() {
@@ -74,8 +114,27 @@
                         }
 
                         //scroll log at bottom
-                        let log = this.$refs.logPre;
-                        if (log) log.scrollTop = log.scrollHeight;
+                        let log = this.$refs.logPre
+                        if (log) log.scrollTop = log.scrollHeight
+                    })
+
+                    copyProgress(p => {
+                        //reloading files if current name changes
+                        if (p.current && !this.progress.current || !p.current && this.progress.current
+                            || p.current && this.progress.current && p.current.name !== this.progress.current.name) {
+                            this.loadFiles()
+                        }
+
+                        this.progress = p
+                        this.progress.percent = Math.round(p.copied * 100 / p.current.size)
+
+                        //remaining time for current file
+                        if (p.current && p.speed) {
+                            let remainSec = (p.current.size - p.copied) / p.speed
+                            this.remaining = moment.duration(remainSec * 1000).format('h [h] m [min] s [s]')
+                        } else {
+                            this.remaining = "-"
+                        }
                     })
                 },
 

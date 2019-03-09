@@ -1,5 +1,5 @@
 function formatBytes (bytes, decimals) {
-    if (bytes === 0) return '0 o';
+    if (bytes === 0 || isNaN(bytes)) return '0 o';
     var k = 1024,
         dm = decimals <= 0 ? 0 : decimals || 1,
         sizes = ['o', 'Ko', 'Mo', 'Go', 'To', 'Po', 'Eo', 'Zo', 'Yo'],
