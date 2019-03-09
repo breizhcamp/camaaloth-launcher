@@ -80,8 +80,9 @@ class CopyThread(props: CamaalothProps, private val msgTpl: SimpMessagingTemplat
 
         if (queue.isEmpty()) {
             progress.reset()
-            sendProgress()
         }
+
+        sendProgress()
     }
 
     /**
@@ -102,12 +103,11 @@ class CopyThread(props: CamaalothProps, private val msgTpl: SimpMessagingTemplat
         }
 
         progress.speed = speed.toBigDecimal().multiply(speedMultiplier.toBigDecimal()).toLong()
-
-        progress.waitingSize = queue.map { it.fileSize }.sum()
         sendProgress()
     }
 
     private fun sendProgress() {
+        progress.waitingSize = queue.map { it.fileSize }.sum()
         msgTpl.convertAndSend("/050-copy-progress", progress)
     }
 }

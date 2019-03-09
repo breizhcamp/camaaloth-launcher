@@ -29,13 +29,14 @@
 	<script>
 		(function() {
 			let upDiv = document.getElementById("upload-time-div")
-			let upTime = $("#upload-time")
+			let upTime = document.getElementById("upload-time")
 
 			copyProgress(progress => {
 
 				if (progress.current) {
 					//display upload time and update values
-					upTime.text(moment.duration(progress.remaining*1000).format('h [h] m [min] s [s]'))
+					upTime.textContent = moment.duration(progress.remaining*1000).format('h [h] m [min] s [s]') +
+							" - " + formatBytes(progress.waitingSize + progress.current.size - progress.copied)
 
 					upDiv.style.maxHeight = "30px"
 					upDiv.style.opacity = 1
