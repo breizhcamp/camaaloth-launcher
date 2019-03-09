@@ -12,16 +12,22 @@ import java.time.format.DateTimeFormatter
  * Service for handling nageru (start/stop...)
  */
 @Service
-class NageruSrv(private val props: CamaalothProps, private val msgTpl: SimpMessagingTemplate) {
+class NageruSrv(private val props: CamaalothProps, private val msgTpl: SimpMessagingTemplate,
+                private val hooks: List<NageruHook> = emptyList()) {
+
     private val logDateFormater = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
 
-    fun start(recordingDir: Path, stompDest: String) {
+    fun start(recordingDir: Path, stompDest: String, preview: Boolean = false) {
         val startScript = Paths.get(props.nageru.startScript).toAbsolutePath().toString()
 
         val cmd = listOf("/bin/bash", startScript, "-r", recordingDir.toAbsolutePath().toString())
         val logFile = recordingDir.resolve(logDateFormater.format(LocalDateTime.now()) + "_nageru.log")
         val runDir = Paths.get(props.nageru.themeDir)
 
-        LongCmdRunner("nageru", cmd, runDir, logFile, msgTpl, stompDest).start()
+        hooks.forEach { it.preNageru(preview) }
+
+        LongCmdRunner("nageru", cmd, runDir, logFile, msgTpl, stompDest)
+                .endCallback { hooks.forEach { it.postNageru(preview) } }
+                .start()
     }
 }

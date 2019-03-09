@@ -12,7 +12,20 @@ private val logger = KotlinLogging.logger {}
  */
 class LongCmdRunner(private val appName: String, private val cmd: List<String>, private val runDir: Path,
                     private val logFile: Path? = null, private val msgTpl: SimpMessagingTemplate? = null,
-                    private val stompDest: String? = null, private val stdCallback: ((String) -> Unit)? = null) : Thread("${appName}Runner") {
+                    private val stompDest: String? = null) : Thread("${appName}Runner") {
+
+    private var stdCallback: ((String) -> Unit)? = null
+    private var endCallback: (() -> Unit)? = null
+
+    fun stdCallback(callback: (String) -> Unit): LongCmdRunner {
+        stdCallback = callback
+        return this
+    }
+
+    fun endCallback(callback: () -> Unit): LongCmdRunner {
+        endCallback = callback
+        return this
+    }
 
     override fun run() {
         logger.info { "Starting $appName with command : [$cmd]" }
@@ -27,6 +40,8 @@ class LongCmdRunner(private val appName: String, private val cmd: List<String>, 
         val exitLog = "$appName stopped and returned [$waitFor]"
         logger.info { exitLog }
         sendMsg(msgTpl, stompDest, exitLog)
+
+        endCallback?.invoke()
     }
 
     /** Read input stream and copy into Outputs */

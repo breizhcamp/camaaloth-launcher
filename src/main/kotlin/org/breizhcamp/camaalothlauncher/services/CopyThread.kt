@@ -78,7 +78,9 @@ class CopyThread(props: CamaalothProps, private val msgTpl: SimpMessagingTemplat
         sendProgress()
 
         //we "run()" the class because we're already in a dedicated thread and want to copy file by file
-        LongCmdRunner("copy", cmd, runDir, logFile, msgTpl, "/050-copy-out", this::parseRsyncAndUpdateProgress).run()
+        LongCmdRunner("copy", cmd, runDir, logFile, msgTpl, "/050-copy-out")
+                .stdCallback(this::parseRsyncAndUpdateProgress)
+                .run()
 
         if (queue.isEmpty()) {
             progress.reset()
