@@ -24,9 +24,7 @@ class TalkConfSrv(private val objectMapper: ObjectMapper, private val props: Cam
 
     /** @return All talks for the room specified in configuration */
     fun listTalksInCurrentRoom(): List<TalkSession> {
-        val talks: List<TalkConf> = objectMapper.readValue(File(props.breizhcamp.scheduleFile))
-
-        return talks
+        return loadTalks()
                 .filter { it.venue == props.breizhcamp.room }
                 .sortedBy { it.eventStart }
                 .map { talkConfToSession(it) }
@@ -52,11 +50,16 @@ class TalkConfSrv(private val objectMapper: ObjectMapper, private val props: Cam
         }
     }
 
+    /** Load all talks for schedules files */
+    private fun loadTalks(): List<TalkConf> {
+        return props.breizhcamp.scheduleFiles.flatMap { file ->
+            objectMapper.readValue<List<TalkConf>>(File(file))
+        }
+    }
+
     /** @return talk with [id] or null */
     private fun getTalk(id: Int): TalkConf? {
-        val talks: List<TalkConf> = objectMapper.readValue(File(props.breizhcamp.scheduleFile))
-
-        return talks.firstOrNull { it.id == id }
+        return loadTalks().firstOrNull { it.id == id }
     }
 
     private fun talkConfToSession(conf: TalkConf): TalkSession {

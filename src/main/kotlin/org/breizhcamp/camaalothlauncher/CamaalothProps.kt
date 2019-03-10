@@ -30,7 +30,7 @@ class CamaalothProps {
         var room = "Amphi C"
 
         /** Location of local shedule.json file */
-        var scheduleFile = "src/test/resources/schedule.json"
+        var scheduleFiles = listOf("src/test/resources/schedule.json")
 
         /** Destination directory of copied files, on remote server if specified */
         var copyDir = "/tmp"

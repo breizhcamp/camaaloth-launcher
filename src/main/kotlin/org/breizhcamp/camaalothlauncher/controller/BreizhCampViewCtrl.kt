@@ -35,8 +35,8 @@ class BreizhCampViewCtrl(private val props: CamaalothProps, private val talkConf
 
         val overriddenDate = props.breizhcamp.overriddenDate
         val overriddenTime = props.breizhcamp.overriddenTime
-        val date = overriddenDate?.let { LocalDate.parse(it) } ?: LocalDate.now()
-        val time = overriddenTime?.let { LocalTime.parse(overriddenTime) } ?: LocalTime.now().minusHours(1)
+        val date = overriddenDate?.let(LocalDate::parse) ?: LocalDate.now()
+        val time = (overriddenTime?.let(LocalTime::parse) ?: LocalTime.now()).minusHours(1)
 
         model.addAttribute("talks", talks.filter { it.date == date && time < it.startTime })
         model.addAttribute("curDate", date)
