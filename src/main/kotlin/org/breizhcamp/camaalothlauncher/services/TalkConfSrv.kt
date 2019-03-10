@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 /**
@@ -59,6 +60,11 @@ class TalkConfSrv(private val objectMapper: ObjectMapper, private val props: Cam
 
     /** @return talk with [id] or null */
     private fun getTalk(id: Int): TalkConf? {
+        if (id == 0) {
+            return TalkConf(0, "Captation à la volée", "Captation sans association à un talk", props.breizhcamp.room,
+                    ZonedDateTime.now(), ZonedDateTime.now().plusHours(1))
+        }
+
         return loadTalks().firstOrNull { it.id == id }
     }
 

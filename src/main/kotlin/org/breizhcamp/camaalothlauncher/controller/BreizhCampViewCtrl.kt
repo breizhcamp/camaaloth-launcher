@@ -2,8 +2,10 @@ package org.breizhcamp.camaalothlauncher.controller
 
 import org.breizhcamp.camaalothlauncher.CamaalothProps
 import org.breizhcamp.camaalothlauncher.dto.CopyCmd
+import org.breizhcamp.camaalothlauncher.dto.Speaker
 import org.breizhcamp.camaalothlauncher.dto.State
 import org.breizhcamp.camaalothlauncher.dto.State.Step.*
+import org.breizhcamp.camaalothlauncher.dto.TalkSession
 import org.breizhcamp.camaalothlauncher.services.CopyThread
 import org.breizhcamp.camaalothlauncher.services.StateSrv
 import org.breizhcamp.camaalothlauncher.services.TalkConfSrv
@@ -38,7 +40,12 @@ class BreizhCampViewCtrl(private val props: CamaalothProps, private val talkConf
         val date = overriddenDate?.let(LocalDate::parse) ?: LocalDate.now()
         val time = (overriddenTime?.let(LocalTime::parse) ?: LocalTime.now()).minusHours(1)
 
-        model.addAttribute("talks", talks.filter { it.date == date && time < it.startTime })
+        val talksOnTime = talks.filter { it.date == date && time < it.startTime }.toMutableList()
+
+        talksOnTime.add(TalkSession("0", "Captation à la volée", listOf(Speaker("Démarre une captation sans association à un talk")),
+                date, LocalTime.now(), LocalTime.now().plusHours(1), "BreizhCamp"))
+
+        model.addAttribute("talks", talksOnTime)
         model.addAttribute("curDate", date)
         model.addAttribute("room", props.breizhcamp.room)
 
