@@ -2,6 +2,7 @@ package org.breizhcamp.camaalothlauncher.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.apache.commons.lang3.StringUtils.stripAccents
 import org.breizhcamp.camaalothlauncher.CamaalothProps
 import org.breizhcamp.camaalothlauncher.dto.Speaker
 import org.breizhcamp.camaalothlauncher.dto.State
@@ -86,11 +87,14 @@ class TalkConfSrv(private val objectMapper: ObjectMapper, private val props: Cam
      * @return the directory name for a specific talk at the same format of the video uploader
      */
     private fun buildVideoDirName(talk: TalkConf): String {
-        val name = talk.name.replace(Regex("[\\\\/:*?\"<>|]"), "-")
-        val speakers = talk.speakers.replace(Regex("[\\\\/:*?\"<>|]"), "-")
+        val name = cleanForFilename(talk.name)
+        val speakers = cleanForFilename(talk.speakers)
 
         return (dayFormat.format(talk.eventStart) + "." + talk.venue + "." + timeFormat.format(talk.eventStart)
                 + " - " + name + " (" + speakers + ") - " + talk.id)
     }
+
+    private fun cleanForFilename(str: String) =
+            stripAccents(str).replace(Regex("[\\\\/:*?\"<>|]"), "-").replace(Regex("[^A-Za-z,\\-\\\\ ]"), "")
 
 }

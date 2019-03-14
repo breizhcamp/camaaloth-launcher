@@ -58,6 +58,7 @@ dependencies {
 	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.0.1'
 	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.0.1'
 
+	implementation 'org.apache.commons:commons-lang3'
 	implementation 'com.fazecast:jSerialComm:2.4.2' //arduino communication
 
 	compile('org.webjars.npm:webstomp-client:1.2.6')
