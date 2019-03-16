@@ -146,6 +146,12 @@
 					this.files = updateOnlyNewFiles(this.files, newFiles, this.updateFile)
 					this.files.sort((f1, f2) => { return f1.name < f2.name ? -1 : f1.name > f2.name })
 
+					if (this.files.length > 0) {
+						//always select the last file to export
+						this.files.forEach(f => f.selected = false)
+						this.files[this.files.length-1].selected = true;
+					}
+
 					if (this.nageruRunning) {
 						this.timeout = setTimeout(() => this.loadFiles(), 10000)
 					}
