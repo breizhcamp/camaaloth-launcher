@@ -38,7 +38,11 @@ class CamaalothProps {
         /** Server string (user@host) used to copy file */
         var copyServer: String? = null
 
-        /** Path to arduino port (ex: /dev/ttyUSB0), if auto, tries to detect all serial port and take the first */
+        /**
+         * Path to arduino port (ex: /dev/ttyUSB0).
+         * If auto, tries to detect all serial port and take the first,
+         * If no, disable entirely the Arduino connection
+         */
         var arduinoPort: String = "auto"
 
         /** For test purpose, set the date (YYYY-MM-DD) to filter talk instead of current date */

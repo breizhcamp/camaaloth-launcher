@@ -23,8 +23,26 @@ class ArduinoSrv(private val props: CamaalothProps): NageruHook {
     private lateinit var input: BufferedReader
     private lateinit var output: BufferedWriter
 
+    /** Do we have to try to connect to the Arduino */
+    private val enabled = props.breizhcamp.arduinoPort != "no"
+
+    /** True if connected and messages can be send */
+    private var connected = false
+
     @PostConstruct
+    fun init() {
+        if (!enabled) {
+            logger.info { "Not trying to connect to Arduino as disabled in configuration" }
+            return
+        }
+
+        connectTo()
+    }
+
+    /** Connect to the Arduino */
     fun connectTo() {
+        if (!enabled) return
+
         port = if (props.breizhcamp.arduinoPort == "auto") {
             val ports = SerialPort.getCommPorts()
             if (ports.isEmpty()) throw IllegalStateException("No serial ports detected")
@@ -36,7 +54,7 @@ class ArduinoSrv(private val props: CamaalothProps): NageruHook {
         logger.info { "Connecting to Arduino on port [${port.systemPortName}]" }
 
         port.setComPortParameters(115200, 8, 1, 0)
-        port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0)
+        port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 500, 0)
         port.clearDTR()
         port.clearRTS()
 
@@ -46,13 +64,17 @@ class ArduinoSrv(private val props: CamaalothProps): NageruHook {
         }
 
         logger.info { "Connected to Arduino on port [${port.systemPortName}]" }
+        connected = true
 
         input = port.inputStream.bufferedReader()
         output = port.outputStream.bufferedWriter()
+
+        switchToCamaaloth() //Portta box starting on input 1, but resetting just in case
     }
 
     @PreDestroy
     fun close() {
+        connected = false
         port.closePort()
     }
 
@@ -66,17 +88,35 @@ class ArduinoSrv(private val props: CamaalothProps): NageruHook {
         switchToCamaaloth()
     }
 
-    private fun switchToSpeaker() = sendKey("1")
-    private fun switchToCamaaloth() = sendKey("2")
+    private fun switchToCamaaloth() = sendKey("1")
+    private fun switchToSpeaker() = sendKey("2")
 
     private fun sendKey(key: String) {
-        output.write("$key\n")
-        output.flush()
+        if (!connected) connectTo()
 
-        val line = input.readLine()
+        if (!connected) {
+            logger.warn { "Trying to send [$key] to Arduino but it's not connected" }
+            return
+        }
 
-        if (line != "$key sent") {
-            logger.error { "Arduino: $key sent but return is not expected : [$line]" }
+        try {
+            output.write("$key\n")
+            output.flush()
+        } catch (e: Exception) {
+            logger.error("Unable to send [$key] to Arduino, port is probably disconnected", e)
+            close()
+            return
+        }
+
+        try {
+            val line = input.readLine()
+
+            if (line != "$key sent") {
+                logger.error { "Arduino: $key sent but return is not expected : [$line]" }
+            }
+        } catch (e: Exception) {
+            logger.error("Unable to read [$key] from Arduino, port is probably disconnected or Arduino too slow to respond", e)
+            close()
         }
     }
 }
