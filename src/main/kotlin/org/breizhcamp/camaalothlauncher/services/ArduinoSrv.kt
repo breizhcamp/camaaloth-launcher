@@ -69,6 +69,7 @@ class ArduinoSrv(private val props: CamaalothProps): NageruHook {
         input = port.inputStream.bufferedReader()
         output = port.outputStream.bufferedWriter()
 
+        Thread.sleep(100) //waiting for Arduino to init
         switchToCamaaloth() //Portta box starting on input 1, but resetting just in case
     }
 
@@ -88,22 +89,24 @@ class ArduinoSrv(private val props: CamaalothProps): NageruHook {
         switchToCamaaloth()
     }
 
-    private fun switchToCamaaloth() = sendKey("1")
-    private fun switchToSpeaker() = sendKey("2")
+    private fun switchToCamaaloth() = sendKey(1)
+    private fun switchToSpeaker() = sendKey(2)
 
-    private fun sendKey(key: String) {
+    private fun sendKey(key: Int) {
         if (!connected) connectTo()
 
+        val msg = buildMsg(key)
+
         if (!connected) {
-            logger.warn { "Trying to send [$key] to Arduino but it's not connected" }
+            logger.warn { "Trying to send [$msg] to Arduino but it's not connected" }
             return
         }
 
         try {
-            output.write("$key\n")
+            output.write("$msg\n")
             output.flush()
         } catch (e: Exception) {
-            logger.error("Unable to send [$key] to Arduino, port is probably disconnected", e)
+            logger.error("Unable to send [$msg] to Arduino, port is probably disconnected", e)
             close()
             return
         }
@@ -111,12 +114,21 @@ class ArduinoSrv(private val props: CamaalothProps): NageruHook {
         try {
             val line = input.readLine()
 
-            if (line != "$key sent") {
-                logger.error { "Arduino: $key sent but return is not expected : [$line]" }
+            if (line != "$msg sent") {
+                logger.error { "Arduino: $msg sent but return is not expected : [$line]" }
             }
         } catch (e: Exception) {
-            logger.error("Unable to read [$key] from Arduino, port is probably disconnected or Arduino too slow to respond", e)
+            logger.error("Unable to read [$msg] from Arduino, port is probably disconnected or Arduino too slow to respond", e)
             close()
         }
+    }
+
+    private fun buildMsg(key: Int): String {
+        if (props.breizhcamp.nbPortsSwitcher == "4") {
+            //for 4x switcher, IR code in Arduino program is shifted from the 2x code that's first one
+            return (key + 2).toString()
+        }
+
+        return "$key"
     }
 }

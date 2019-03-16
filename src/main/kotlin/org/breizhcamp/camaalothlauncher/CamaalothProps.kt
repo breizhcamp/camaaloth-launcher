@@ -45,6 +45,9 @@ class CamaalothProps {
          */
         var arduinoPort: String = "auto"
 
+        /** Number of ports (2 or 4) in portta switcher as they don't use the same infrared signals -_- */
+        var nbPortsSwitcher: String = "2"
+
         /** For test purpose, set the date (YYYY-MM-DD) to filter talk instead of current date */
         var overriddenDate: String? = null
 
