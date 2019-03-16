@@ -14,6 +14,12 @@ class CamaalothProps {
     /** Location of script called for copying file */
     var copyScript = "src/test/resources/copy-script.sh"
 
+    /** Location of script called just before starting recording */
+    var preRecordScript: String? = null
+
+    /** Location of script called just after the end of recording */
+    var postRecordScript: String? = null
+
     val nageru = Nageru()
     val breizhcamp = BreizhCamp()
 

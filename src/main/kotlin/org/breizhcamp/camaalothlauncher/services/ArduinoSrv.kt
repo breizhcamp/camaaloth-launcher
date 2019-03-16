@@ -68,9 +68,6 @@ class ArduinoSrv(private val props: CamaalothProps): NageruHook {
 
         input = port.inputStream.bufferedReader()
         output = port.outputStream.bufferedWriter()
-
-        Thread.sleep(100) //waiting for Arduino to init
-        switchToCamaaloth() //Portta box starting on input 1, but resetting just in case
     }
 
     @PreDestroy
