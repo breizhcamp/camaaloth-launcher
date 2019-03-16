@@ -35,6 +35,7 @@
 				<thead>
 				<tr>
 					<th scope="col">#</th>
+					<th scope="col">Sel.</th>
 					<th scope="col">Fichier</th>
 					<th scope="col">Taille</th>
 					<!--<th scope="col">Durée</th>-->
@@ -44,6 +45,7 @@
 				<tbody>
 				<tr v-for="(f, idx) in files" :class="{ 'table-active': f.selected }" @click="selectFile(f)">
 					<td>{{ idx + 1 }}</td>
+					<td><input type="checkbox" v-model="f.selected"></td>
 					<td>{{ f.name }}</td>
 					<td>{{ f.size | formatBytes }}</td>
 					<!--<td>{{ f.duration | duration().format('h [h] m [min] s [s]') }}</td>-->
