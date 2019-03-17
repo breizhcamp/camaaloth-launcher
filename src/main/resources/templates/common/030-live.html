@@ -160,6 +160,7 @@
 				updateFile(file, newFile) {
 					if (newFile) {
 						Vue.set(file, 'lastModified', newFile.lastModified)
+						Vue.set(file, 'size', newFile.size)
 					} else {
 						file.selected = true //selected by default
 					}
