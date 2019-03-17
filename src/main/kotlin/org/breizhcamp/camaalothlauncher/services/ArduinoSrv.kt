@@ -45,11 +45,16 @@ class ArduinoSrv(private val props: CamaalothProps): NageruHook {
 
         port = if (props.breizhcamp.arduinoPort == "auto") {
             val ports = SerialPort.getCommPorts()
-            if (ports.isEmpty()) throw IllegalStateException("No serial ports detected")
+
+            if (ports.isEmpty()) {
+                connected = false
+                return
+            }
+
             ports.first()
         } else {
             SerialPort.getCommPort(props.breizhcamp.arduinoPort)
-        } ?: throw java.lang.IllegalStateException("Cannot find Arduino port")
+        }
 
         logger.info { "Connecting to Arduino on port [${port.systemPortName}]" }
 
