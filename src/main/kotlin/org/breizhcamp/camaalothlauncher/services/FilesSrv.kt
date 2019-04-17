@@ -6,6 +6,7 @@ import org.breizhcamp.camaalothlauncher.dto.FileMeta
 import org.breizhcamp.camaalothlauncher.dto.LsblkDto
 import org.breizhcamp.camaalothlauncher.dto.Partition
 import org.springframework.stereotype.Service
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -20,7 +21,7 @@ private val logger = KotlinLogging.logger {}
 class FilesSrv(private val objectMapper: ObjectMapper) {
 
     /** @return The list of removable and mounted partitions */
-    fun readPartitions(): List<Partition> {
+    fun readPartitions(withSpaceLeft: Boolean = false): List<Partition> {
         //lsblk -o NAME,MOUNTPOINT,VENDOR,LABEL,MODEL,HOTPLUG,SIZE -J
         val cmd = listOf("lsblk", "-o", "NAME,MOUNTPOINT,VENDOR,LABEL,MODEL,HOTPLUG,SIZE", "-J")
         val jsonLsblk = ShortCmdRunner("lsblk partitions", cmd, true).run()
@@ -32,6 +33,12 @@ class FilesSrv(private val objectMapper: ObjectMapper) {
                 if (child.mountpoint != null) {
                     partitions.add(Partition(child.mountpoint, child.name, child.label, device.model?.trim(), device.vendor?.trim(), child.size))
                 }
+            }
+        }
+
+        if (withSpaceLeft) {
+            partitions.forEach {
+                it.spaceLeft = File(it.mountpoint).usableSpace
             }
         }
 
@@ -82,4 +89,7 @@ class FilesSrv(private val objectMapper: ObjectMapper) {
         val split = dur.split(".")
         return Duration.ofSeconds(split[0].toLong(), split[1].toLong() * 1000)
     }
+
+    /** Sum file size of [files] */
+    fun filesSize(files: List<Path>) = files.fold(0L) { acc, file -> acc + Files.size(file) }
 }

@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component
 import java.nio.file.Path
 
 /**
- * Statefull class containing current recording state
+ * Stateful class containing current recording state
  */
 @Component
 class State {
@@ -22,6 +22,9 @@ class State {
 
     /** After recording, list of file to convert into MP4 or to copy */
     var filesToExport: List<Path> = emptyList()
+
+    /** Copy destination dir for ug */
+    var copyingDir: String? = null
 
     fun previewDir() = recordingPath?.resolve("preview")
 }

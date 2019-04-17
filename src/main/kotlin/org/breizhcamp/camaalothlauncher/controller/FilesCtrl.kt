@@ -24,6 +24,9 @@ class FilesCtrl(private val filesSrv: FilesSrv, private val talkSrv: TalkSrv) {
         return filesSrv.getFilesFromPartitions(partitions, "*.ug.zip")
     }
 
+    @GetMapping("/removable")
+    fun listRemovableDisk() = filesSrv.readPartitions(true)
+
     @GetMapping("/talk")
     fun readTalkSession(@RequestParam file: String) : TalkSession {
         return talkSrv.readTalkSession(file)

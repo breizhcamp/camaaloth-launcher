@@ -9,5 +9,6 @@ data class Partition(
         val label: String?,
         val model: String?,
         val vendor: String?,
-        val size: String?
+        val size: String?,
+        var spaceLeft: Long? = 0
 )

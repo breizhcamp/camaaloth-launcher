@@ -52,3 +52,15 @@ body {
 	height: 40px;
 	font-size: 25px;
 }
+
+#cards li {
+	font-style: italic;
+}
+
+#cards .card-text {
+	font-weight: bold;
+}
+
+#cards .card-subtitle {
+	font-size: 80%;
+}

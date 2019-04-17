@@ -37,6 +37,45 @@
 			</div>
 		</div>
 
+		<div class="row mb-3">
+			<div class="col-sm jumbotron jumbo-light">
+				<p class="text-center mb-4">
+                    Veuillez sélectionner la <strong>destination de la copie</strong> (lecteur externe).<br>
+					Taille à copier : {{size | formatBytes}}
+				</p>
+
+                <div id="cards">
+                    <div class="row" v-for="i in Math.ceil(drives.length / 4)">
+                        <div class="col-sm-3" v-for="d in drives.slice((i - 1) * 4, i * 4)">
+                            <div class="card">
+                                <div>
+                                    <div class="card-body">
+                                        <h5 class="card-title" v-if="!d.label">{{d.vendor}} {{d.model}}</h5>
+										<h5 class="card-title mb-1" v-if="d.label">{{d.label}}</h5>
+                                        <h5 class="card-subtitle mb-2" v-if="d.label">{{d.vendor}} {{d.model}}</h5>
+
+                                        <h6 class="card-subtitle mb-1 text-muted">/dev/{{d.deviceName}}</h6>
+                                        <h6 class="card-subtitle mb-2 text-muted">{{d.mountpoint}}</h6>
+
+                                        <p>Espace total : {{d.size}}</p>
+                                        <p class="mb-2">
+											Espace libre : {{d.spaceLeft | formatBytes}}
+											<i class="fas fa-exclamation-circle" v-if="d.spaceLeft < size"></i>
+											<i class="far fa-check-circle" v-if="d.spaceLeft > size"></i>
+										</p>
+
+                                        <button @click="selCopy(d)" class="btn"
+												:class="{ 'btn-primary': d.mountpoint != selMnt, 'btn-success': d.mountpoint == selMnt }">
+											Copier ici
+										</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+			</div>
+		</div>
 
 		<div class="row mb-3" v-if="log.length > 0">
 			<div class="col-sm-12">
@@ -48,7 +87,7 @@
 	</div>
 
 	<script>
-		moment.locale('fr')
+        moment.locale('fr')
 		Vue.use(vueMoment, { moment })
 		new Vue({
 			el: '#vue',
@@ -57,11 +96,15 @@
 				ffmpegRunning: false,
 				progress: 0,
 				duration: 100,
-				remaining: null
+				size: 0,
+				remaining: null,
+                drives: [],
+				selMnt: null
 			},
 
 			created() {
 				this.connectToWS()
+                this.loadDrives()
 			},
 
 			computed: {
@@ -79,7 +122,9 @@
 				connectToWS() {
 					ws.onConnect(() => {
 						axios.post('/export/start').then(res => {
-							this.duration = moment.duration(res.data).asMilliseconds()
+							let exportStart = res.data;
+							this.duration = moment.duration(exportStart.filesLength).asMilliseconds()
+							this.size = exportStart.filesSize
 						})
 
 					}).sub('/040-ffmpeg-export-out', msg => {
@@ -113,6 +158,25 @@
 						this.remaining = moment.duration(remainMs)
 					})
 				},
+
+                loadDrives() {
+                    axios.get('/files/removable').then(res => {
+                        this.drives = res.data
+                        setTimeout(() => this.loadDrives(), 1000)
+                    })
+                },
+
+				selCopy(drive) {
+					if (this.selMnt !== drive.mountpoint) {
+						this.selMnt = drive.mountpoint
+					} else {
+						//unselect
+						this.selMnt = null
+					}
+					let data = new FormData()
+					data.set('dir', this.selMnt)
+					axios.post('/copy/dir', data)
+				}
 			}
 		})
 	</script>
