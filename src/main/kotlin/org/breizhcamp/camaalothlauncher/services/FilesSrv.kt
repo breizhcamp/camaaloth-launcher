@@ -92,4 +92,10 @@ class FilesSrv(private val objectMapper: ObjectMapper) {
 
     /** Sum file size of [files] */
     fun filesSize(files: List<Path>) = files.fold(0L) { acc, file -> acc + Files.size(file) }
+
+    /** Shutdown the computer */
+    fun shutdown() {
+        val cmd = listOf("systemctl", "poweroff")
+        ShortCmdRunner("poweroff", cmd).run()
+    }
 }

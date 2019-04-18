@@ -46,6 +46,10 @@
                 <div><a th:href="@{/010-talk-choice}" class="btn btn-primary btn-lg">Relancer une captation</a></div>
                 <div class="font-italic font-90" v-if="progress.current">La copie continuera en arrière-plan</div>
             </div>
+
+            <div class="col text-center">
+                <button class="btn btn-secondary btn-lg" @click="shutdown">Éteindre le PC</button>
+            </div>
         </div>
 
         <div class="row mb-3 mt-4" v-if="files.length > 0">
@@ -135,6 +139,10 @@
                     axios.get('/copy/waiting').then(res => {
                         this.files = res.data
                     })
+                },
+
+                shutdown() {
+                    axios.post('/copy/shutdown')
                 }
             }
         })
