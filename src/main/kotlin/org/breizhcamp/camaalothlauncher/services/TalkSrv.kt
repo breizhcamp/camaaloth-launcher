@@ -1,6 +1,7 @@
 package org.breizhcamp.camaalothlauncher.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.apache.commons.lang3.StringUtils
 import org.breizhcamp.camaalothlauncher.CamaalothProps
 import org.breizhcamp.camaalothlauncher.dto.State
 import org.breizhcamp.camaalothlauncher.dto.TalkSession
@@ -61,11 +62,14 @@ class TalkSrv(private val objectMapper: ObjectMapper, private val props: Camaalo
         state.currentTalk = t
 
         val dirName = LocalDate.now().toString() + " - " + t.talk + " - " + t.speakers.joinToString(" -") { it.name }
-        state.recordingPath = Paths.get(props.recordingDir, dirName.replace('/', '-')).toAbsolutePath()
+        state.recordingPath = Paths.get(props.recordingDir, cleanForFilename(dirName)).toAbsolutePath()
 
         createCurrentTalkDirAndCopyInfos(zipFile, state)
         extractImagesToThemeDir(zipFile)
     }
+
+    fun cleanForFilename(str: String) =
+            StringUtils.stripAccents(str).replace(Regex("[\\\\/:*?\"<>|]"), "-").replace(Regex("[^A-Za-z0-9,\\-\\\\ ]"), "")
 
     /** Create directory for current dir */
     private fun createCurrentTalkDirAndCopyInfos(zipFile: String, state: State) {

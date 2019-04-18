@@ -138,6 +138,7 @@
 
 						} else if (body === 'ffmpeg stopped and returned [0]') {
 							this.progress = 100
+							this.goCopy()
 						}
 
 						this.log.push(body)
@@ -175,7 +176,18 @@
 					}
 					let data = new FormData()
 					data.set('dir', this.selMnt)
-					axios.post('/copy/dir', data)
+
+					axios.post('/copy/dir', data).then(res => {
+						if (res.status === 204) {
+							this.goCopy()
+						}
+					})
+				},
+
+				goCopy() {
+					if (this.selMnt && this.progress === 100) {
+						window.location = '050-copy'
+					}
 				}
 			}
 		})

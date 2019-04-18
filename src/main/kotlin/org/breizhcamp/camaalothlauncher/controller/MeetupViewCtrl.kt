@@ -1,7 +1,9 @@
 package org.breizhcamp.camaalothlauncher.controller
 
+import org.breizhcamp.camaalothlauncher.dto.CopyCmd
 import org.breizhcamp.camaalothlauncher.dto.State
 import org.breizhcamp.camaalothlauncher.dto.State.Step.*
+import org.breizhcamp.camaalothlauncher.services.CopyThread
 import org.breizhcamp.camaalothlauncher.services.StateSrv
 import org.breizhcamp.camaalothlauncher.services.TalkSrv
 import org.springframework.context.annotation.Profile
@@ -9,13 +11,15 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
+import java.nio.file.Paths
 
 /**
  * Display views in meetup flavour
  */
 @Profile("!breizhcamp")
 @Controller
-class MeetupViewCtrl(private val talkSrv: TalkSrv, private val state: State, private val stateSrv: StateSrv) {
+class MeetupViewCtrl(private val talkSrv: TalkSrv, private val state: State, private val stateSrv: StateSrv,
+                     private val copyThread: CopyThread) {
 
     @GetMapping("/")
     fun home() : String {
@@ -55,5 +59,20 @@ class MeetupViewCtrl(private val talkSrv: TalkSrv, private val state: State, pri
         stateSrv.save(EXPORT, state)
         model.addAttribute("talk", talk)
         return "meetup/040-export"
+    }
+
+    @GetMapping("/050-copy")
+    fun copy() : String {
+        val src = state.recordingPath ?: return "redirect:010-talk-choice"
+        val dest = state.copyingDir ?: return "redirect:040-export"
+        state.filesToExport = emptyList()
+
+        //let's copy exported file into selected destination
+        val fullDest = Paths.get(dest, "videos")
+        copyThread.addFileToCopy(CopyCmd(src.resolve("infos.ug.zip"), fullDest, src))
+        copyThread.addFileToCopy(CopyCmd(src.resolve("export.mp4"), fullDest, src))
+
+
+        return "common/050-copy"
     }
 }
