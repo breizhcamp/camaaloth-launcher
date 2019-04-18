@@ -9,5 +9,7 @@ import org.springframework.boot.runApplication
 class CamaalothLauncherApplication
 
 fun main(args: Array<String>) {
-    runApplication<CamaalothLauncherApplication>(*args)
+    runApplication<CamaalothLauncherApplication>(*args) {
+        this.setHeadless(false)
+    }
 }
