@@ -20,6 +20,10 @@ class CamaalothProps {
     /** Location of script called just after the end of recording */
     var postRecordScript: String? = null
 
+    /** Do we show the systray or not */
+    var systray = true
+
+
     val nageru = Nageru()
     val breizhcamp = BreizhCamp()
 

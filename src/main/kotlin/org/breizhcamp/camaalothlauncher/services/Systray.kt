@@ -3,6 +3,7 @@ package org.breizhcamp.camaalothlauncher.services
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
 import mu.KotlinLogging
+import org.breizhcamp.camaalothlauncher.CamaalothProps
 import org.springframework.boot.web.servlet.context.ServletWebServerInitializedEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Service
@@ -15,13 +16,14 @@ private val logger = KotlinLogging.logger {}
  * Adding systray when running
  */
 @Service
-class Systray: ApplicationListener<ServletWebServerInitializedEvent> {
+class Systray(private val props: CamaalothProps): ApplicationListener<ServletWebServerInitializedEvent> {
 
     private var httpPort = 0
 
     override fun onApplicationEvent(event: ServletWebServerInitializedEvent) {
         httpPort = event.source.port
 
+        if (!props.systray) return
         val systray = SystemTray.get() ?: return logger.warn("System is not handling systray")
 
         systray.setTooltip("Camaaloth Launcher")
