@@ -19,7 +19,7 @@
 
 	<div id="cards">
 		<div class="row" v-for="i in Math.ceil(files.length / 4)">
-			<div class="col-sm-3" v-for="f in files.slice((i - 1) * 4, i * 4)">
+			<div class="col-sm-3" v-for="(f, idx) in files.slice((i - 1) * 4, i * 4)">
 				<div class="card">
 					<div v-if="f.talk">
 						<img class="card-img-top" :src="'data:image/jpeg;base64,' + f.talk.logo" :alt="f.talk.name" v-if="f.talk.logo">
@@ -32,7 +32,10 @@
 								<li v-for="speaker in f.talk.speakers">{{speaker.name}}</li>
 							</ul>
 
-							<a :href="'020-preview?file=' + f.path + '/' + f.name" class="btn btn-primary">Filmer ce talk</a>
+							<a :href="'020-preview?file=' + f.path + '/' + f.name" v-pad-click="{ button: 13 + idx - (4 * (i-1)) }"
+							   class="btn btn-primary">
+								Filmer ce talk <i :class="'pad pad-' + (13 + idx - (4 * (i-1)))"></i>
+							</a>
 						</div>
 					</div>
 				</div>

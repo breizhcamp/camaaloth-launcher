@@ -16,16 +16,21 @@
 
 		<div class="row mb-3">
 			<div class="col-sm text-center" v-if="!firstRun && files.length == 0">
-				<button class="btn btn-primary btn-lg" @click="start()">Démarrer l'enregistrement</button>
+				<button class="btn btn-primary btn-lg" @click="start()" v-pad-click="{ button: 13, disable: false }">
+					Démarrer l'enregistrement <i class="pad pad-13"></i></button>
 			</div>
 			<div class="col-sm text-center" v-else>
-				<button class="btn btn-warning btn-lg" @click="start()">RELANCER</button>
+				<button class="btn btn-warning btn-lg" @click="start()" v-pad-click="{ button: 13, disable: false }">
+					RELANCER <i class="pad pad-13"></i></button>
 			</div>
 
 
 			<div class="col-sm text-center" v-if="files.length > 0">
-				<a class="btn btn-outline-primary btn-lg" th:if="${!forceExport}" th:href="@{/010-talk-choice}">Enchainer avec un nouveau talk</a>
-				<button class="btn btn-primary btn-lg" @click="exportTalk()">Exporter le talk</button>
+				<a class="btn btn-outline-primary btn-lg" th:if="${!forceExport}" th:href="@{/010-talk-choice}" v-pad-click="15">
+					Enchainer avec un nouveau talk <i class="pad pad-15"></i></a>
+
+				<button class="btn btn-primary btn-lg" @click="exportTalk()" v-pad-click="16">
+					Exporter le talk <i class="pad pad-16"></i></button>
 			</div>
 		</div>
 

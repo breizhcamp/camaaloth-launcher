@@ -16,20 +16,26 @@
 
 		<div class="row mb-3" v-if="!firstRun">
 			<div class="col-sm text-center">
-				<button class="btn btn-primary btn-lg" @click="start()">Lancer le preview</button>
+				<button class="btn btn-primary btn-lg" @click="start()" v-pad-click="{ button: 13, disable: false }">
+					Lancer le preview <i class="pad pad-13"></i>
+				</button>
 			</div>
 			<div class="col-sm text-center">
-				<button class="btn btn-outline-primary btn-lg" @click="goLive()">Passer au live directement</button>
+				<button class="btn btn-outline-primary btn-lg" @click="goLive()" v-pad-click="16">
+					Passer au live directement <i class="pad pad-16"></i>
+				</button>
 			</div>
 		</div>
 
 		<div class="row mb-3" v-else>
 			<div class="col-sm text-center">
-				<button class="btn btn-outline-success btn-lg" @click="start()">Relancer le preview</button>
-				<button class="btn btn-success btn-lg" @click="view()">Voir le preview</button>
+				<button class="btn btn-outline-success btn-lg" @click="start()" v-pad-click="{ button: 13, disable: false }">
+					Relancer le preview <i class="pad pad-13"></i></button>
+				<button class="btn btn-success btn-lg" @click="view()" v-pad-click="{ button: 14, disable: false }">
+					Voir le preview <i class="pad pad-14"></i></button>
 			</div>
 			<div class="col-sm text-center">
-				<button class="btn btn-primary btn-lg" @click="goLive()">Passer au live</button>
+				<button class="btn btn-primary btn-lg" @click="goLive()" v-pad-click="16">Passer au live <i class="pad pad-16"></i></button>
 			</div>
 		</div>
 

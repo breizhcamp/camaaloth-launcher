@@ -1,0 +1,35 @@
+@font-face {
+    font-family: 'pad';
+    src: url('pad-webfont.woff2') format('woff2'),
+    url('pad-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.pad {
+    display:inline-block;
+    font-style:normal;
+    font-variant:normal;
+    text-rendering:auto;
+    line-height:1;
+    font-family: pad;
+}
+
+.pad-1::before { content: "A" }
+.pad-2::before { content: "B" }
+.pad-3::before { content: "C" }
+.pad-4::before { content: "D" }
+.pad-5::before { content: "E" }
+.pad-6::before { content: "F" }
+.pad-7::before { content: "G" }
+.pad-8::before { content: "H" }
+.pad-9::before { content: "I" }
+.pad-10::before { content: "J" }
+.pad-11::before { content: "K" }
+.pad-12::before { content: "L" }
+.pad-13::before { content: "M" }
+.pad-14::before { content: "N" }
+.pad-15::before { content: "O" }
+.pad-16::before { content: "P" }
+
+.pad-all::before { content: "Z" }

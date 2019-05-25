@@ -7,7 +7,7 @@
 <body>
 
 <div class="row" layout:fragment="content">
-	<div class="col-sm jumbotron">
+	<div class="col-sm jumbotron" id="vue">
 		<img src="/static/img/breizhcamp-logo.svg" th:src="@{/img/breizhcamp-logo.svg}" class="float-right" width="150" height="150">
 		<h1 class="display-3">Camaaloth</h1>
 		<p class="lead">by BreizhCamp</p>
@@ -17,8 +17,16 @@
 		<p>Configure et lance la capture vidéo pour les users groups.</p>
 		<p>La navigation peut se faire à l'aide du pad, appuyez sur n'importe quel bouton du pad pour commencer.</p>
 
-		<a class="btn btn-primary btn-lg" href="010-talk-choice">Commencer</a>
+		<a class="btn btn-primary btn-lg" href="010-talk-choice" v-pad-click="13">
+			Commencer <i class="pad pad-13"></i>
+		</a>
 	</div>
+
+	<script>
+		new Vue({
+			el: '#vue'
+		})
+	</script>
 </div>
 
 </body>
