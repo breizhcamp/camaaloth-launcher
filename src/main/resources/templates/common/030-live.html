@@ -41,6 +41,7 @@
 				<tr>
 					<th scope="col">#</th>
 					<th scope="col">Sel.</th>
+					<th scope="col">Pad</th>
 					<th scope="col">Fichier</th>
 					<th scope="col">Taille</th>
 					<!--<th scope="col">Durée</th>-->
@@ -48,9 +49,10 @@
 				</tr>
 				</thead>
 				<tbody>
-				<tr v-for="(f, idx) in files" :class="{ 'table-active': f.selected }" @click="selectFile(f)">
+				<tr v-for="(f, idx) in files" :class="{ 'table-active': f.selected }" @click="selectFile(f)" v-pad-click="{ button: getBtnNum(idx), disable: false }">
 					<td>{{ idx + 1 }}</td>
 					<td><input type="checkbox" v-model="f.selected"></td>
+					<td><i :class="'pad pad-' + getBtnNum(idx)"></i></td>
 					<td>{{ f.name }}</td>
 					<td>{{ f.size | formatBytes }}</td>
 					<!--<td>{{ f.duration | duration().format('h [h] m [min] s [s]') }}</td>-->
@@ -180,6 +182,10 @@
 					params.append('file', file.name)
 					axios.post('/live/view', params)
 				},
+
+				getBtnNum(idx) {
+					return 9 - (idx%3)*4 + Math.floor(idx/3)
+				}
 
 			}
 		})

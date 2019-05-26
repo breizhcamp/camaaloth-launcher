@@ -46,7 +46,7 @@
 
                 <div id="cards">
                     <div class="row" v-for="i in Math.ceil(drives.length / 4)">
-                        <div class="col-sm-3" v-for="d in drives.slice((i - 1) * 4, i * 4)">
+                        <div class="col-sm-3" v-for="(d, idx) in drives.slice((i - 1) * 4, i * 4)">
                             <div class="card">
                                 <div>
                                     <div class="card-body">
@@ -65,8 +65,9 @@
 										</p>
 
                                         <button @click="selCopy(d)" class="btn"
-												:class="{ 'btn-primary': d.mountpoint != selMnt, 'btn-success': d.mountpoint == selMnt }">
-											Copier ici
+												:class="{ 'btn-primary': d.mountpoint != selMnt, 'btn-success': d.mountpoint == selMnt }"
+												v-pad-click="{ button: 13 + idx - (4 * (i-1)), disable: false }">
+											Copier ici <i :class="'pad pad-' + (13 + idx - (4 * (i-1)))"></i>
 										</button>
                                     </div>
                                 </div>
