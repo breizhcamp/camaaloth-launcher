@@ -3,8 +3,8 @@ package org.breizhcamp.camaalothlauncher.services.midi
 import mu.KotlinLogging
 import org.breizhcamp.camaalothlauncher.controller.PadCtrl
 import org.breizhcamp.camaalothlauncher.dto.PadMsg
+import org.breizhcamp.camaalothlauncher.services.NageruHook
 import org.springframework.stereotype.Service
-import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
 import javax.sound.midi.MidiDevice
 import javax.sound.midi.MidiMessage
@@ -16,17 +16,12 @@ private val logger = KotlinLogging.logger {}
  * Class for Midi controller connection
  */
 @Service
-class MidiSrv(private val controllers: List<MidiController>, private val padCtrl: PadCtrl): Thread("MidiThread") {
+class MidiSrv(private val controllers: List<MidiController>, private val padCtrl: PadCtrl): Thread("MidiThread"), NageruHook {
 
     /** Does the thread is running */
     private var running = true
 
     private var connectedDevices: MutableList<MidiDevice> = ArrayList()
-
-    @PostConstruct
-    fun startup() {
-        connect()
-    }
 
     @PreDestroy
     fun shutdown() {
@@ -34,17 +29,28 @@ class MidiSrv(private val controllers: List<MidiController>, private val padCtrl
         disconnect()
     }
 
+    override fun preNageru(preview: Boolean) {
+        logger.info { "[MIDI] Disconnecting all ${connectedDevices.size} devices" }
+        disconnect()
+    }
 
-    fun connect() {
+    override fun postNageru(preview: Boolean) {
+        logger.info { "[MIDI] Connecting devices" }
+        connect()
+    }
+
+
+    private fun connect() {
         val infos = MidiSystem.getMidiDeviceInfo()
 
         for (info in infos) {
-            logger.info { "Midi device ${info.name}" }
+            logger.debug { "[MIDI] Device ${info.name}" }
             val device = MidiSystem.getMidiDevice(info)
 
             val handlers = controllers.filter { it.handle(device, info) }
 
             if (handlers.isNotEmpty()) {
+                logger.info { "[MIDI] Opening [${info.name}] device" }
                 device.open()
                 handlers.forEach { device.transmitter.receiver = Receiver(it, padCtrl) }
                 connectedDevices.add(device)
@@ -52,12 +58,12 @@ class MidiSrv(private val controllers: List<MidiController>, private val padCtrl
         }
     }
 
-    fun disconnect() {
+    private fun disconnect() {
         connectedDevices.filter(MidiDevice::isOpen).forEach(MidiDevice::close)
         connectedDevices.clear()
     }
 
-    class Receiver(val midiCtrl: MidiController, val padCtrl: PadCtrl) : javax.sound.midi.Receiver {
+    private class Receiver(val midiCtrl: MidiController, val padCtrl: PadCtrl) : javax.sound.midi.Receiver {
 
 
         override fun send(message: MidiMessage, timeStamp: Long) {
