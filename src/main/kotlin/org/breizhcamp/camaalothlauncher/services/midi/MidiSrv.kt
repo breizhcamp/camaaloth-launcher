@@ -43,6 +43,8 @@ class MidiSrv(private val controllers: List<MidiController>, private val padCtrl
     private fun connect() {
         val infos = MidiSystem.getMidiDeviceInfo()
 
+        logger.info { "[MIDI] Devices list: " + infos.joinToString { it.name } }
+
         for (info in infos) {
             logger.debug { "[MIDI] Device ${info.name}" }
             val device = MidiSystem.getMidiDevice(info)
