@@ -13,7 +13,7 @@ import javax.sound.midi.MidiDevice
 class AkaiMPD128MidiCtrl: MidiController {
 
     override fun handle(device: MidiDevice, info: MidiDevice.Info): Boolean {
-        return info.name.contains("MPD218") && device.maxReceivers >= 0
+        return info.name.contains("MPD218 [hw") && device.maxReceivers >= 0
     }
 
     override fun event(status: Int, bank: Int, msg: ByteArray): PadMsg {
