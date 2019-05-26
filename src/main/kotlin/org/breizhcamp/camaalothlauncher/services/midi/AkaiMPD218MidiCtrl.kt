@@ -1,5 +1,6 @@
 package org.breizhcamp.camaalothlauncher.services.midi
 
+import org.breizhcamp.camaalothlauncher.CamaalothProps
 import org.breizhcamp.camaalothlauncher.dto.PadMsg
 import org.breizhcamp.camaalothlauncher.dto.PadMsg.PadAction
 import org.breizhcamp.camaalothlauncher.dto.PadMsg.PadType
@@ -7,13 +8,14 @@ import org.springframework.stereotype.Component
 import javax.sound.midi.MidiDevice
 
 /**
- * Implementation for Akai MPD 128
+ * Implementation for Akai MPD 218
  */
 @Component
-class AkaiMPD128MidiCtrl: MidiController {
+class AkaiMPD218MidiCtrl(private val props: CamaalothProps): MidiController {
 
     override fun handle(device: MidiDevice, info: MidiDevice.Info): Boolean {
-        return info.name.contains("MPD218 [hw") && device.maxReceivers >= 0
+        val name = props.akaiName ?: return false
+        return info.name.contains(name) && device.maxReceivers >= 0
     }
 
     override fun event(status: Int, bank: Int, msg: ByteArray): PadMsg {

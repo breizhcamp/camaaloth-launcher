@@ -23,6 +23,9 @@ class CamaalothProps {
     /** Do we show the systray or not */
     var systray = true
 
+    /** Name of Akai in midi list */
+    var akaiName: String? = null
+
 
     val nageru = Nageru()
     val breizhcamp = BreizhCamp()
