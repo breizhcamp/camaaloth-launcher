@@ -1,6 +1,7 @@
 package org.breizhcamp.camaalothlauncher.controller
 
-import org.breizhcamp.camaalothlauncher.dto.PadMsg
+import org.breizhcamp.camaalothlauncher.dto.MidiReceivedMsg
+import org.springframework.context.event.EventListener
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Controller
 
@@ -10,8 +11,9 @@ import org.springframework.stereotype.Controller
 @Controller
 class PadCtrl(private val msgTpl: SimpMessagingTemplate) {
 
-    fun send(msg: PadMsg) {
-        msgTpl.convertAndSend("/pad", msg)
+    @EventListener
+    fun send(event: MidiReceivedMsg) {
+        msgTpl.convertAndSend("/pad", event.msg)
     }
 
 }

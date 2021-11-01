@@ -12,7 +12,7 @@ import javax.sound.midi.ShortMessage
  * Implementation for Akai MPD 218
  */
 @Component
-class AkaiMPD218MidiCtrl(private val props: CamaalothProps): MidiController {
+class AkaiMPD218MidiCtrl(private val props: CamaalothProps): MidiReceiveController {
 
     override fun handle(device: MidiDevice, info: MidiDevice.Info): Boolean {
         val name = props.akaiName ?: return false
