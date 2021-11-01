@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Service
 import java.io.IOException
 import java.net.URL
+import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
@@ -49,7 +50,7 @@ class Systray(private val props: CamaalothProps): ApplicationListener<ServletWeb
      * @param url URL to start with
      */
     private fun startBrowser(url: String) {
-        val os = System.getProperty("os.name").toLowerCase()
+        val os = System.getProperty("os.name").lowercase()
         var commands: Array<String>? = null
 
         //start browser depending the operating system

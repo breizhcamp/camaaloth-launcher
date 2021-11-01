@@ -59,7 +59,7 @@ class LongCmdRunner(private val appName: String, private val cmd: List<String>, 
             inputStream.bufferedReader().forEachLine { line ->
                 logger.debug { "$appName stdout : $line" }
                 sendMsg(msgTpl, stompDest, line)
-                log?.appendln(line)
+                log?.appendLine(line)
                 log?.flush()
                 stdCallback?.invoke(line)
             }
