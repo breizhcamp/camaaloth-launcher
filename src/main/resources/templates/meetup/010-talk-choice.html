@@ -32,7 +32,7 @@
 								<li v-for="speaker in f.talk.speakers">{{speaker.name}}</li>
 							</ul>
 
-							<a :href="'020-preview?file=' + f.path + '/' + f.name" v-pad-click="{ button: 13 + idx - (4 * (i-1)) }"
+							<a :href="'020-record?file=' + f.path + '/' + f.name" v-pad-click="{ button: 13 + idx - (4 * (i-1)) }"
 							   class="btn btn-primary">
 								Filmer ce talk <i :class="'pad pad-' + (13 + idx - (4 * (i-1)))"></i>
 							</a>

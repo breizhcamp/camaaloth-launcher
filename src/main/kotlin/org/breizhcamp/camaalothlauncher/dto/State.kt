@@ -9,7 +9,7 @@ import java.nio.file.Path
 @Component
 class State {
     enum class Step {
-        CHOICE, PREVIEW, LIVE, EXPORT
+        CHOICE, RECORD, EXPORT
     }
 
     var step = Step.CHOICE

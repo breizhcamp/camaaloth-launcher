@@ -1,7 +1,7 @@
 package org.breizhcamp.camaalothlauncher.controller
 
 import org.breizhcamp.camaalothlauncher.dto.State
-import org.breizhcamp.camaalothlauncher.services.NageruSrv
+import org.breizhcamp.camaalothlauncher.services.recorder.NageruSrv
 import org.breizhcamp.camaalothlauncher.services.ViewVideoSrv
 import org.springframework.http.HttpStatus.NO_CONTENT
 import org.springframework.web.bind.annotation.*

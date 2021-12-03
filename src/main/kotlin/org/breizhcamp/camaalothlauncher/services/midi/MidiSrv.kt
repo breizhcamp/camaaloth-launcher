@@ -1,10 +1,12 @@
 package org.breizhcamp.camaalothlauncher.services.midi
 
 import mu.KotlinLogging
+import org.breizhcamp.camaalothlauncher.CamaalothProps
 import org.breizhcamp.camaalothlauncher.dto.MidiReceivedMsg
 import org.breizhcamp.camaalothlauncher.dto.PadMsg
-import org.breizhcamp.camaalothlauncher.services.NageruHook
+import org.breizhcamp.camaalothlauncher.services.recorder.RecorderHook
 import org.breizhcamp.camaalothlauncher.services.midi.MidiSrv.MidiWay.*
+import org.breizhcamp.camaalothlauncher.services.recorder.RecorderType
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import javax.annotation.PreDestroy
@@ -19,20 +21,23 @@ private val logger = KotlinLogging.logger {}
  */
 @Service
 class MidiSrv(
+    private val props: CamaalothProps,
     private val receiveCtrls: List<MidiReceiveController>,
     private val sendingCtrls: List<MidiSendController>,
     private val publisher: ApplicationEventPublisher,
-): NageruHook {
+): RecorderHook {
 
     private val receivingDevices = ArrayList<MidiDevice>()
     private val transmittingDevices = ArrayList<Pair<MidiDevice, MidiSendController>>()
 
-    override fun preNageru(preview: Boolean) {
+    override fun preRecord(preview: Boolean) {
+        if (props.recorder != RecorderType.NAGERU) return;
         logger.info { "[MIDI] Disconnecting all ${receivingDevices.size} devices" }
         disconnect()
     }
 
-    override fun postNageru(preview: Boolean) {
+    override fun postRecord(preview: Boolean) {
+        if (props.recorder != RecorderType.NAGERU) return;
         logger.info { "[MIDI] Connecting devices" }
         connect()
     }

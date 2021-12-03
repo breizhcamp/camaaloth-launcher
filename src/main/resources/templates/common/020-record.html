@@ -9,8 +9,8 @@
 
 <body>
 <div layout:fragment="content">
-	<div th:replace="stepper :: stepper(step = 3)"></div>
-	<div th:replace="talk_header :: talk_header(talk = ${talk}, link = @{/020-preview})"></div>
+	<div th:replace="stepper :: stepper(step = 2)"></div>
+	<div th:replace="talk_header :: talk_header(talk = ${talk}, link = @{/010-talk-choice})"></div>
 
 	<div id="vue">
 
@@ -78,7 +78,7 @@
 			el: '#vue',
 			data: {
 				firstRun: false,
-				nageruRunning: false,
+				recordRunning: false,
 				log: [],
 				files: [],
 				timeout: null
@@ -91,15 +91,15 @@
 
 			methods: {
 				connectToWS() {
-					ws.sub('/030-nageru-live-out', msg => {
+					ws.sub('/020-record-live-out', msg => {
 						let body = msg.body
 						if (body === '---- NEW STREAM ----') {
 							this.log = []
-							this.nageruRunning = true;
+							this.recordRunning = true;
 							this.loadFiles();
 
 						} else if (body === '---- END STREAM ----') {
-							this.nageruRunning = false;
+							this.recordRunning = false;
 							this.loadFiles();
 						}
 
@@ -121,16 +121,16 @@
 				},
 
 				start() {
-					axios.post('/live/start').then(() => {
+					axios.post('/record/start').then(() => {
 						this.firstRun = true
 					})
 				},
 
 				exportTalk() {
 					let files = this.files.filter(f => f.selected).map(f => f.name)
-					axios.post('/live/export', files).then((res) => {
+					axios.post('/record/export', files).then((res) => {
 						if (res.status === 204) {
-							window.location = '040-export'
+							window.location = '030-export'
 						} else {
 							alert(res.data)
 						}
@@ -144,7 +144,7 @@
 						this.timeout = null
 					}
 
-					axios.get('/live/files').then(res => {
+					axios.get('/record/files').then(res => {
 						this.updateFiles(res.data)
 					})
 				},
@@ -172,7 +172,7 @@
 						file.selected = true //selected by default
 					}
 
-					// axios.get('/live/duration', { params: { file: file.path + '/' + file.name }}).then(res => {
+					// axios.get('/record/duration', { params: { file: file.path + '/' + file.name }}).then(res => {
 					// 	Vue.set(file, 'duration', res.data)
 					// })
 				},
@@ -180,7 +180,7 @@
 				viewFile(file) {
 					let params = new FormData()
 					params.append('file', file.name)
-					axios.post('/live/view', params)
+					axios.post('/record/view', params)
 				},
 
 				getBtnNum(idx) {

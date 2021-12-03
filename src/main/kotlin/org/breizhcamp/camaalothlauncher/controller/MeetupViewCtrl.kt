@@ -32,33 +32,25 @@ class MeetupViewCtrl(private val talkSrv: TalkSrv, private val state: State, pri
         return "meetup/010-talk-choice"
     }
 
-    @GetMapping("/020-preview")
-    fun preview(@RequestParam file: String?, model: Model) : String {
+    @GetMapping("/020-record")
+    fun live(@RequestParam file: String?, model: Model) : String {
         file?.let { talkSrv.setCurrentTalkFromFile(it, state) }
-
         val talk = state.currentTalk ?: return "redirect:010-talk-choice"
-        stateSrv.save(PREVIEW, state)
-        model.addAttribute("talk", talk)
-        return "common/020-preview"
-    }
 
-    @GetMapping("/030-live")
-    fun live(model: Model) : String {
-        val talk = state.currentTalk ?: return "redirect:010-talk-choice"
         model.addAttribute("talk", talk)
         model.addAttribute("forceExport", false)
 
-        stateSrv.save(LIVE, state)
-        return "common/030-live"
+        stateSrv.save(RECORD, state)
+        return "common/020-record"
     }
 
-    @GetMapping("/040-export")
+    @GetMapping("/030-export")
     fun export(model: Model) : String {
         val talk = state.currentTalk ?: return "redirect:010-talk-choice"
 
         stateSrv.save(EXPORT, state)
         model.addAttribute("talk", talk)
-        return "meetup/040-export"
+        return "meetup/030-export"
     }
 
     @GetMapping("/050-copy")

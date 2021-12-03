@@ -16,7 +16,7 @@ class AkaiMPD218MidiCtrl(private val props: CamaalothProps): MidiReceiveControll
 
     override fun handle(device: MidiDevice, info: MidiDevice.Info): Boolean {
         val name = props.akaiName ?: return false
-        return info.name.contains(name) && device.maxReceivers >= 0
+        return info.name.contains(name)
     }
 
     override fun event(status: Int, bank: Int, msg: ByteArray): PadMsg {

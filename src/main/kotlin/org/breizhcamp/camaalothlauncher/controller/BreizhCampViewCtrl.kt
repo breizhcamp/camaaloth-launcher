@@ -53,37 +53,22 @@ class BreizhCampViewCtrl(private val props: CamaalothProps, private val talkConf
         return "breizhcamp/010-talk-choice"
     }
 
-    @GetMapping("/020-preview")
-    fun preview(@RequestParam id: Int?, model: Model) : String {
+    @GetMapping("/020-record")
+    fun live(@RequestParam id: Int?, model: Model) : String {
         id?.let { talkConfSrv.setCurrentTalk(it, state) }
-
-        val talk = state.currentTalk ?: return "redirect:010-talk-choice"
-        model.addAttribute("talk", talk)
-
-        stateSrv.save(PREVIEW, state)
-        return "common/020-preview"
-    }
-
-    @GetMapping("/030-live")
-    fun live(model: Model) : String {
         val talk = state.currentTalk ?: return "redirect:010-talk-choice"
         model.addAttribute("talk", talk)
         model.addAttribute("forceExport", true)
 
-        stateSrv.save(LIVE, state)
-        return "common/030-live"
+        stateSrv.save(RECORD, state)
+        return "common/020-record"
     }
 
-    @GetMapping("/040-export")
-    fun export() : String {
-        //no export in BreizhCamp configuration, go direct into copy step
-        return "redirect:050-copy"
-    }
-
-    @GetMapping("/050-copy")
+    @GetMapping("/030-export")
     fun copy() : String {
         val recordingPath = state.recordingPath ?: return "redirect:010-talk-choice"
         val dest = Paths.get(props.breizhcamp.copyDir)
+        stateSrv.save(EXPORT, state)
 
         //add all exported file into copy queue
         state.filesToExport.forEach { f ->
@@ -93,5 +78,4 @@ class BreizhCampViewCtrl(private val props: CamaalothProps, private val talkConf
 
         return "common/050-copy"
     }
-
 }

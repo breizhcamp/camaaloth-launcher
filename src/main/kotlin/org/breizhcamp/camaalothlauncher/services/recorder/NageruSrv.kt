@@ -1,6 +1,7 @@
-package org.breizhcamp.camaalothlauncher.services
+package org.breizhcamp.camaalothlauncher.services.recorder
 
 import org.breizhcamp.camaalothlauncher.CamaalothProps
+import org.breizhcamp.camaalothlauncher.services.LongCmdRunner
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.messaging.simp.SimpMessagingTemplate
@@ -16,21 +17,9 @@ import javax.annotation.PreDestroy
  */
 @Service
 class NageruSrv(private val props: CamaalothProps, private val msgTpl: SimpMessagingTemplate,
-                private val hooks: List<NageruHook> = emptyList()) {
+                private val hooks: List<RecorderHook> = emptyList()) {
 
     private val logDateFormater = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
-
-    /** Run post hooks at startup to init everything */
-    @EventListener(ApplicationReadyEvent::class)
-    fun runStartupHooks() {
-        hooks.forEach { it.postNageru(false) }
-    }
-
-    /** Run pre hooks on shutdown to reset state */
-    @PreDestroy
-    fun runStopHooks() {
-        hooks.forEach { it.preNageru(false) }
-    }
 
     fun start(recordingDir: Path, stompDest: String, preview: Boolean = false) {
         val startScript = Paths.get(props.nageru.startScript).toAbsolutePath().toString()
@@ -39,10 +28,10 @@ class NageruSrv(private val props: CamaalothProps, private val msgTpl: SimpMessa
         val logFile = recordingDir.resolve(logDateFormater.format(LocalDateTime.now()) + "_nageru.log")
         val runDir = Paths.get(props.nageru.themeDir)
 
-        hooks.forEach { it.preNageru(preview) }
+        hooks.forEach { it.preRecord(preview) }
 
         LongCmdRunner("nageru", cmd, runDir, logFile, msgTpl, stompDest)
-                .endCallback { hooks.forEach { it.postNageru(preview) } }
+                .endCallback { hooks.forEach { it.postRecord(preview) } }
                 .start()
     }
 }

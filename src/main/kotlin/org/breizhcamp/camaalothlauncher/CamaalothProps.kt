@@ -1,5 +1,6 @@
 package org.breizhcamp.camaalothlauncher
 
+import org.breizhcamp.camaalothlauncher.services.recorder.RecorderType
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 /**
@@ -26,8 +27,9 @@ class CamaalothProps {
     /** Name of Akai in midi list */
     var akaiName: String? = null
 
-
+    val recorder: RecorderType = RecorderType.OBS
     val nageru = Nageru()
+    val obs = Obs()
     val breizhcamp = BreizhCamp()
 
     class Nageru {
@@ -35,6 +37,10 @@ class CamaalothProps {
         var startScript = "src/test/resources/start-script.sh"
         /** location of nageru theme */
         var themeDir = "videos/theme"
+    }
+
+    class Obs {
+        var startCmd = listOf("obs")
     }
 
     /** Configurations used when BreizhCamp flavour is on */
@@ -67,5 +73,4 @@ class CamaalothProps {
         /** For test purpose, set the time (HH:MM) to filter talk instead of current time */
         var overriddenTime: String? = null
     }
-
 }

@@ -7,20 +7,12 @@
 		<p>Talk</p>
 	</div>
 	<div class="col">
-		<a th:href="@{/020-preview}" type="button" class="btn btn-circle" th:classappend="${step == 2} ? 'btn-primary' : 'btn-info'">2</a>
-		<p>Preview</p>
+		<a th:href="@{/020-record}" type="button" class="btn btn-circle" th:classappend="${step == 2} ? 'btn-primary' : 'btn-info'">2</a>
+		<p>Record</p>
 	</div>
 	<div class="col">
-		<a th:href="@{/030-live}" type="button" class="btn btn-circle" th:classappend="${step == 3} ? 'btn-primary' : 'btn-info'">3</a>
-		<p>Live</p>
-	</div>
-	<div class="col">
-		<a th:href="@{/040-export}" type="button" class="btn btn-circle" th:classappend="${step == 4} ? 'btn-primary' : 'btn-info'">4</a>
+		<a th:href="@{/030-export}" type="button" class="btn btn-circle" th:classappend="${step == 3} ? 'btn-primary' : 'btn-info'">3</a>
 		<p>Export</p>
-	</div>
-	<div class="col">
-		<a th:href="@{/050-copy}" type="button" class="btn btn-circle" th:classappend="${step == 5} ? 'btn-primary' : 'btn-info'">5</a>
-		<p>Copie</p>
 		<div class="text-muted upload-time" id="upload-time-div">
 			<i class="fas fa-upload"></i> <span id="upload-time">10m 5s</span>
 		</div>

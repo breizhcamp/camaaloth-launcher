@@ -7,7 +7,7 @@ data class PadMsg(
     val buttonName: String,
     val type: PadType,
     val action: PadAction,
-    val value: Int
+    val value: Int?
 ) {
     companion object {
         const val UNKNOWN_NAME = "UNKNOWN"

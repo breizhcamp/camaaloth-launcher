@@ -3,6 +3,7 @@ package org.breizhcamp.camaalothlauncher.services
 import com.fazecast.jSerialComm.SerialPort
 import mu.KotlinLogging
 import org.breizhcamp.camaalothlauncher.CamaalothProps
+import org.breizhcamp.camaalothlauncher.services.recorder.RecorderHook
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import java.io.BufferedReader
@@ -17,7 +18,7 @@ private val logger = KotlinLogging.logger {}
  */
 @Profile("breizhcamp")
 @Service
-class ArduinoSrv(private val props: CamaalothProps): NageruHook {
+class ArduinoSrv(private val props: CamaalothProps): RecorderHook {
 
     private lateinit var port: SerialPort
     private lateinit var input: BufferedReader
@@ -81,12 +82,12 @@ class ArduinoSrv(private val props: CamaalothProps): NageruHook {
         port.closePort()
     }
 
-    override fun preNageru(preview: Boolean) {
+    override fun preRecord(preview: Boolean) {
         if (preview) return
         switchToSpeaker()
     }
 
-    override fun postNageru(preview: Boolean) {
+    override fun postRecord(preview: Boolean) {
         if (preview) return
         switchToCamaaloth()
     }
