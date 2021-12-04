@@ -2,75 +2,84 @@ package org.breizhcamp.camaalothlauncher
 
 import org.breizhcamp.camaalothlauncher.services.recorder.RecorderType
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.ConstructorBinding
 
 /**
  * Properties for camaalooth
  */
 @ConfigurationProperties("camaaloth")
+@ConstructorBinding
 class CamaalothProps {
 
     /** directory containing recording, each in sub-directory */
-    var recordingDir = "videos"
+    val recordingDir = "videos"
 
     /** Location of script called for copying file */
-    var copyScript = "src/test/resources/copy-script.sh"
+    val copyScript = "src/test/resources/copy-script.sh"
 
     /** Location of script called just before starting recording */
-    var preRecordScript: String? = null
+    val preRecordScript: String? = null
 
     /** Location of script called just after the end of recording */
-    var postRecordScript: String? = null
+    val postRecordScript: String? = null
 
     /** Do we show the systray or not */
-    var systray = true
+    val systray = true
 
     /** Name of Akai in midi list */
-    var akaiName: String? = null
+    val akaiName: String? = null
 
     val recorder: RecorderType = RecorderType.OBS
     val nageru = Nageru()
     val obs = Obs()
     val breizhcamp = BreizhCamp()
 
+    @ConstructorBinding
     class Nageru {
         /** bash start for nageru, params of bash script must be added to nageru params */
-        var startScript = "src/test/resources/start-script.sh"
+        val startScript = "src/test/resources/start-script.sh"
         /** location of nageru theme */
-        var themeDir = "videos/theme"
+        val themeDir = "videos/theme"
     }
 
+    @ConstructorBinding
     class Obs {
-        var startCmd = listOf("obs")
+        val startCmd = listOf("obs")
+        /** URL of websocket-obs */
+        val wsUrl = "ws://localhost:4444"
+        /** Password of websocket-obs */
+        val wsPassword: String = "breizhcamp"
     }
 
     /** Configurations used when BreizhCamp flavour is on */
+    @ConstructorBinding
     class BreizhCamp {
         /** Name of the room the launcher display talks in */
-        var room = "Amphi C"
+        val room = "Amphi C"
 
         /** Location of local shedule.json file */
-        var scheduleFiles = listOf("src/test/resources/schedule.json")
+        val scheduleFiles = listOf("src/test/resources/schedule.json")
 
         /** Destination directory of copied files, on remote server if specified */
-        var copyDir = "/tmp"
+        val copyDir = "/tmp"
 
         /** Server string (user@host) used to copy file */
-        var copyServer: String? = null
+        val copyServer: String? = null
 
         /**
          * Path to arduino port (ex: /dev/ttyUSB0).
          * If auto, tries to detect all serial port and take the first,
          * If no, disable entirely the Arduino connection
          */
-        var arduinoPort: String = "auto"
+        val arduinoPort: String = "auto"
 
         /** Number of ports (2 or 4) in portta switcher as they don't use the same infrared signals -_- */
-        var nbPortsSwitcher: String = "2"
+        val nbPortsSwitcher: String = "2"
 
         /** For test purpose, set the date (YYYY-MM-DD) to filter talk instead of current date */
-        var overriddenDate: String? = null
+        val overriddenDate: String? = null
 
         /** For test purpose, set the time (HH:MM) to filter talk instead of current time */
-        var overriddenTime: String? = null
+        val overriddenTime: String? = null
     }
 }

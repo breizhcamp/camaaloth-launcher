@@ -4,11 +4,13 @@ import mu.KotlinLogging
 import org.breizhcamp.camaalothlauncher.CamaalothProps
 import org.breizhcamp.camaalothlauncher.dto.MidiReceivedMsg
 import org.breizhcamp.camaalothlauncher.dto.PadMsg
+import org.breizhcamp.camaalothlauncher.dto.PadValue
 import org.breizhcamp.camaalothlauncher.services.recorder.RecorderHook
 import org.breizhcamp.camaalothlauncher.services.midi.MidiSrv.MidiWay.*
 import org.breizhcamp.camaalothlauncher.services.recorder.RecorderType
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
+import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
 import javax.sound.midi.MidiDevice
 import javax.sound.midi.MidiMessage
@@ -32,13 +34,11 @@ class MidiSrv(
 
     override fun preRecord(preview: Boolean) {
         if (props.recorder != RecorderType.NAGERU) return;
-        logger.info { "[MIDI] Disconnecting all ${receivingDevices.size} devices" }
         disconnect()
     }
 
     override fun postRecord(preview: Boolean) {
         if (props.recorder != RecorderType.NAGERU) return;
-        logger.info { "[MIDI] Connecting devices" }
         connect()
     }
 
@@ -55,7 +55,9 @@ class MidiSrv(
         }
     }
 
+    @PostConstruct
     fun connect() {
+        logger.info { "[MIDI] Connecting devices" }
         val infos = MidiSystem.getMidiDeviceInfo()
 
         logger.info { "[MIDI] Devices list: " + infos.joinToString { it.name } }
@@ -83,9 +85,9 @@ class MidiSrv(
         }
     }
 
-    fun setValue(message: PadMsg) {
+    fun setValue(message: PadValue) {
         transmittingDevices.forEach { (device, ctrl) ->
-            ctrl.getSendMsg(message)?.let {
+            ctrl.getSendMsg(message).forEach {
                 logger.debug { "Sending message to MIDI Controller: ${it.message}" }
                 device.receiver.send(it, -1)
             }
@@ -102,6 +104,7 @@ class MidiSrv(
     }
 
     private fun disconnect() {
+        logger.info { "[MIDI] Disconnecting all ${receivingDevices.size} devices" }
         transmittingDevices.forEach { (device, ctrl) -> ctrl.close().forEach { device.receiver.send(it, -1) } }
 
         receivingDevices.filter(MidiDevice::isOpen).forEach(MidiDevice::close)

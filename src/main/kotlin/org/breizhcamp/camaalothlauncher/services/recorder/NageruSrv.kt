@@ -33,5 +33,7 @@ class NageruSrv(private val props: CamaalothProps, private val msgTpl: SimpMessa
         LongCmdRunner("nageru", cmd, runDir, logFile, msgTpl, stompDest)
                 .endCallback { hooks.forEach { it.postRecord(preview) } }
                 .start()
+
+        hooks.forEach { it.postStart() }
     }
 }

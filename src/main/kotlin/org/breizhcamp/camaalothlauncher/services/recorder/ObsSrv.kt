@@ -30,5 +30,7 @@ class ObsSrv(private val props: CamaalothProps, private val msgTpl: SimpMessagin
         LongCmdRunner("obs", cmd, recordingDir, logFile, msgTpl, stompDest)
                 .endCallback { hooks.forEach { it.postRecord(preview) } }
                 .start()
+
+        hooks.forEach { it.postStart() }
     }
 }

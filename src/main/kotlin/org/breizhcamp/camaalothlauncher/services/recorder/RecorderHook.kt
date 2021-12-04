@@ -12,6 +12,11 @@ interface RecorderHook {
     fun preRecord(preview: Boolean) { }
 
     /**
+     * Hook executed after recorder started
+     */
+    fun postStart() { }
+
+    /**
      * Hook executed after recorder exited
      * @param preview true if recorder is started on preview
      */
