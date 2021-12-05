@@ -16,6 +16,7 @@ class LongCmdRunner(private val appName: String, private val cmd: List<String>, 
 
     private var stdCallback: ((String) -> Unit)? = null
     private var endCallback: (() -> Unit)? = null
+    private var currentProcess: Process? = null
 
     fun stdCallback(callback: (String) -> Unit): LongCmdRunner {
         stdCallback = callback
@@ -27,6 +28,11 @@ class LongCmdRunner(private val appName: String, private val cmd: List<String>, 
         return this
     }
 
+    fun exec(): LongCmdRunner {
+        this.start()
+        return this
+    }
+
     override fun run() {
         logger.info { "Starting $appName with command : [$cmd]" }
         val process = ProcessBuilder(cmd)
@@ -34,14 +40,20 @@ class LongCmdRunner(private val appName: String, private val cmd: List<String>, 
                 .directory(runDir.toFile())
                 .start()
 
+        currentProcess = process
         ReadStream(process.inputStream, "${appName}StdoutReader").start()
         val waitFor = process.waitFor()
+        currentProcess = null
 
         val exitLog = "$appName stopped and returned [$waitFor]"
         logger.info { exitLog }
         sendMsg(msgTpl, stompDest, exitLog)
 
         endCallback?.invoke()
+    }
+
+    fun end() {
+        currentProcess?.destroy()
     }
 
     /** Read input stream and copy into Outputs */
