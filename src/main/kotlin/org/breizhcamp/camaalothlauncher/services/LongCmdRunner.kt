@@ -53,7 +53,7 @@ class LongCmdRunner(private val appName: String, private val cmd: List<String>, 
     }
 
     fun end() {
-        currentProcess?.destroy()
+        currentProcess?.let { ShortCmdRunner("exitObs", listOf("kill", "-SIGINT", it.pid().toString())).run() }
     }
 
     /** Read input stream and copy into Outputs */

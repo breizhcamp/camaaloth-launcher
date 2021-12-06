@@ -4,6 +4,7 @@ import net.twasi.obsremotejava.OBSRemoteController
 import org.breizhcamp.camaalothlauncher.dto.*
 import org.breizhcamp.camaalothlauncher.services.midi.MidiSrv
 import org.breizhcamp.camaalothlauncher.services.recorder.ObsSrv
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
 
 /**
@@ -23,7 +24,7 @@ import org.springframework.stereotype.Component
 class ObsRecord(
     private val controller: OBSRemoteController,
     private val midiSrv: MidiSrv,
-    //private val obsSrv: ObsSrv,
+    private val publisher: ApplicationEventPublisher,
 ): ObsHandler {
     private enum class RecordingState { STOPPED, STARTING, RECORDING, STOPPING }
     private var state = RecordingState.STOPPED
@@ -53,7 +54,7 @@ class ObsRecord(
 
     private fun stopRec() {
         if (state == RecordingState.STOPPED) {
-            //obsSrv.stop()
+            publisher.publishEvent(ObsStopMsg())
         } else {
             if (state == RecordingState.RECORDING) updateState(RecordingState.STOPPING)
             controller.stopRecording {}

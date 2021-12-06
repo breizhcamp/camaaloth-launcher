@@ -2,6 +2,7 @@ package org.breizhcamp.camaalothlauncher.services.recorder
 
 import org.breizhcamp.camaalothlauncher.CamaalothProps
 import org.breizhcamp.camaalothlauncher.services.LongCmdRunner
+import org.breizhcamp.camaalothlauncher.services.obs.ObsStopMsg
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.messaging.simp.SimpMessagingTemplate
@@ -41,5 +42,10 @@ class ObsSrv(private val props: CamaalothProps, private val msgTpl: SimpMessagin
 
     fun stop() {
         cmdRunner?.end()
+    }
+
+    @EventListener
+    fun listenStop(event: ObsStopMsg) {
+        stop()
     }
 }
