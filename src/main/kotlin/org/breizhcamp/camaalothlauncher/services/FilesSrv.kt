@@ -1,6 +1,9 @@
 package org.breizhcamp.camaalothlauncher.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.breizhcamp.camaalothlauncher.dto.FileMeta
 import org.breizhcamp.camaalothlauncher.dto.LsblkDto
@@ -43,6 +46,15 @@ class FilesSrv(private val objectMapper: ObjectMapper) {
         }
 
         return partitions
+    }
+
+    fun getPartitionFromDir(dir: Path): Partition {
+        return Partition(
+            dir.toString(),
+            "",
+            spaceLeft = dir.toFile().usableSpace,
+            label = "Local directory"
+        )
     }
 
     /**
@@ -92,6 +104,17 @@ class FilesSrv(private val objectMapper: ObjectMapper) {
 
     /** Sum file size of [files] */
     fun filesSize(files: List<Path>) = files.fold(0L) { acc, file -> acc + Files.size(file) }
+
+    /**
+     * Compute the length of several video files
+     */
+    fun videoFileLength(files: List<Path>) : Duration = runBlocking(Dispatchers.IO) {
+        val defered = files.map { f ->
+            async { fileDuration(f) }
+        }
+
+        defered.fold(Duration.ZERO) { acc, d -> acc + d.await() }
+    }
 
     /** Shutdown the computer */
     fun shutdown() {

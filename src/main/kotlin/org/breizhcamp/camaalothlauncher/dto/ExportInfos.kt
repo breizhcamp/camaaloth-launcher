@@ -5,7 +5,7 @@ import java.time.Duration
 /**
  * Data sent when starting export
  */
-data class ExportStart (
+data class ExportInfos (
         /** Duration sum of video files to export */
         val filesLength: Duration,
 

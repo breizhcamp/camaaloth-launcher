@@ -9,39 +9,53 @@
 
 <body>
 <div layout:fragment="content">
-	<div th:replace="stepper :: stepper(step = 4)"></div>
-	<div th:replace="talk_header :: talk_header(talk = ${talk}, link = @{/030-live})"></div>
+	<div th:replace="stepper :: stepper(step = 3)"></div>
+	<div th:replace="talk_header :: talk_header(talk = ${talk}, link = @{/020-record})"></div>
 
 	<div id="vue">
-		<div class="row mb-3">
-			<div class="col-md-6">
-				<h4 v-if="ffmpegRunning">Export en cours...</h4>
-				<h4 v-if="!ffmpegRunning && progress < 100">Export en attente...</h4>
-				<h4 v-if="!ffmpegRunning && progress == 100">Export terminé</h4>
+		<div v-if="this.ffmpegState !== 'NOT_STARTED'">
+			<div class="row mb-3">
+				<div class="col-md-6">
+					<h4 v-if="this.ffmpegState === 'RUNNING'">Export en cours...</h4>
+					<h4 v-if="this.ffmpegState === 'DONE'">Export terminé</h4>
+				</div>
+				<div class="col-md-6">
+					<p v-if="remaining && this.ffmpegState === 'RUNNING'" class="text-muted font-italic text-right">
+						Temps restant estimé : {{ remaining | duration().format('h [h] m [min] s [s]') }}
+					</p>
+				</div>
 			</div>
-			<div class="col-md-6">
-				<p v-if="remaining && ffmpegRunning" class="text-muted font-italic text-right">
-					Temps restant estimé : {{ remaining | duration().format('h [h] m [min] s [s]') }}
-				</p>
-			</div>
-		</div>
 
-		<div class="row mb-3">
-			<div class="col-md-12">
-				<div class="progress pgbar">
-					<div class="progress-bar" role="progressbar"
-						 v-bind:class="progressBarStyle" v-bind:style="{ width: progress + '%' }" >
-						{{progress}}%
+			<div class="row mb-3">
+				<div class="col-md-12">
+					<div class="progress pgbar">
+						<div class="progress-bar" role="progressbar"
+							 v-bind:class="progressBarStyle" v-bind:style="{ width: progress + '%' }" >
+							{{progress}}%
+						</div>
 					</div>
+				</div>
+			</div>
+
+			<div class="row mt-5 mb-5" v-if="this.ffmpegState === 'DONE'">
+				<div class="col text-center">
+					<div><a th:href="@{/010-talk-choice}" class="btn btn-primary btn-lg" v-pad-click="13">
+						Relancer une captation <i class="pad pad-13"></i></a></div>
+				</div>
+
+				<div class="col text-center">
+					<button class="btn btn-secondary btn-lg" @click="shutdown" v-pad-click="16">
+						Éteindre le PC <i class="pad pad-16"></i></button>
 				</div>
 			</div>
 		</div>
 
-		<div class="row mb-3">
+		<div  v-if="this.ffmpegState === 'NOT_STARTED'" class="row mb-3">
 			<div class="col-sm jumbotron jumbo-light">
 				<p class="text-center mb-4">
-                    Veuillez sélectionner la <strong>destination de la copie</strong> (lecteur externe).<br>
-					Taille à copier : {{size | formatBytes}}
+                    Veuillez sélectionner la <strong>destination de l'export</strong>.<br>
+					Taille à copier : <strong>{{size | formatBytes}}</strong>
+					<i>(Durée de la vidéo : {{ duration | duration().format('h [h] m [min] s [s]') }})</i>
 				</p>
 
                 <div id="cards">
@@ -54,10 +68,10 @@
 										<h5 class="card-title mb-1" v-if="d.label">{{d.label}}</h5>
                                         <h5 class="card-subtitle mb-2" v-if="d.label">{{d.vendor}} {{d.model}}</h5>
 
-                                        <h6 class="card-subtitle mb-1 text-muted">/dev/{{d.deviceName}}</h6>
+                                        <h6 class="card-subtitle mb-1 text-muted">{{d.deviceName}}</h6>
                                         <h6 class="card-subtitle mb-2 text-muted">{{d.mountpoint}}</h6>
 
-                                        <p>Espace total : {{d.size}}</p>
+                                        <p v-if="d.size">Espace total : {{d.size}}</p>
                                         <p class="mb-2">
 											Espace libre : {{d.spaceLeft | formatBytes}}
 											<i class="fas fa-exclamation-circle" v-if="d.spaceLeft < size"></i>
@@ -65,9 +79,9 @@
 										</p>
 
                                         <button @click="selCopy(d)" class="btn"
-												:class="{ 'btn-primary': d.mountpoint != selMnt, 'btn-success': d.mountpoint == selMnt }"
-												v-pad-click="{ button: 13 + idx - (4 * (i-1)), disable: false }">
-											Copier ici <i :class="'pad pad-' + (13 + idx - (4 * (i-1)))"></i>
+												:class="{ 'btn-primary': d.mountpoint != selMnt, 'btn-success': d.mountpoint == selMnt }">
+											<i class="far fa-check-circle" v-if="d.mountpoint == selMnt"></i>
+											Exporter ici
 										</button>
                                     </div>
                                 </div>
@@ -75,6 +89,10 @@
                         </div>
                     </div>
                 </div>
+
+				<p class="text-center">
+					<button class="btn btn-primary btn-lg btn-block mt-4" :disabled="!selMnt" @click="startExport()">Lancer l'export</button>
+				</p>
 			</div>
 		</div>
 
@@ -94,9 +112,9 @@
 			el: '#vue',
 			data: {
 				log: [],
-				ffmpegRunning: false,
+				ffmpegState: 'NOT_STARTED',
 				progress: 0,
-				duration: 100,
+				duration: 0,
 				size: 0,
 				remaining: null,
                 drives: [],
@@ -104,6 +122,7 @@
 			},
 
 			created() {
+				this.loadInfos()
 				this.connectToWS()
                 this.loadDrives()
 			},
@@ -111,35 +130,33 @@
 			computed: {
 				progressBarStyle() {
 					return {
-						'progress-bar-animated': this.ffmpegRunning,
-						'progress-bar-striped': this.ffmpegRunning,
-						'bg-info': !this.ffmpegRunning && this.progress < 100,
-						'bg-success': !this.ffmpegRunning && this.progress === 100
+						'progress-bar-animated': this.ffmpegState === 'RUNNING',
+						'progress-bar-striped': this.ffmpegState === 'RUNNING',
+						'bg-info': this.ffmpegState === 'NOT_STARTED',
+						'bg-success': this.ffmpegState === 'DONE'
 					}
 				}
 			},
 
 			methods: {
-				connectToWS() {
-					ws.onConnect(() => {
-						axios.post('/export/start').then(res => {
-							let exportStart = res.data;
-							this.duration = moment.duration(exportStart.filesLength).asMilliseconds()
-							this.size = exportStart.filesSize
-						})
+				loadInfos() {
+					axios.get('/export/infos').then(res => {
+						let exportStartInfos = res.data;
+						this.duration = moment.duration(exportStartInfos.filesLength).asMilliseconds()
+						this.size = exportStartInfos.filesSize
+					})
+				},
 
-					}).sub('/040-ffmpeg-export-out', msg => {
+				connectToWS() {
+					ws.sub('/030-ffmpeg-export-out', msg => {
 						let body = msg.body
 						if (body === '---- NEW STREAM ----') {
 							this.log = []
-							this.ffmpegRunning = true
-
-						} else if (body === '---- END STREAM ----') {
-							this.ffmpegRunning = false
+							this.ffmpegState = 'RUNNING'
 
 						} else if (body === 'ffmpeg stopped and returned [0]') {
 							this.progress = 100
-							this.goCopy()
+							this.ffmpegState = 'DONE'
 						}
 
 						this.log.push(body)
@@ -153,7 +170,7 @@
 						let log = this.$refs.logPre
 						if (log) log.scrollTop = log.scrollHeight
 
-					}).sub('/040-ffmpeg-export-progress', msg => {
+					}).sub('/030-ffmpeg-export-progress', msg => {
 						let progress = JSON.parse(msg.body)
 						this.progress = Math.round(progress.outTimeUs / this.duration / 10) //us -> ms /1000 - percent -> *100
 						let remainMs = (this.duration - progress.outTimeUs / 1000) / progress.speed
@@ -162,6 +179,8 @@
 				},
 
                 loadDrives() {
+					if (this.ffmpegState !== 'NOT_STARTED') return
+
                     axios.get('/files/removable').then(res => {
                         this.drives = res.data
                         setTimeout(() => this.loadDrives(), 1000)
@@ -175,20 +194,17 @@
 						//unselect
 						this.selMnt = null
 					}
-					let data = new FormData()
-					data.set('dir', this.selMnt)
-
-					axios.post('/copy/dir', data).then(res => {
-						if (res.status === 204) {
-							this.goCopy()
-						}
-					})
 				},
 
-				goCopy() {
-					if (this.selMnt && this.progress === 100) {
-						window.location = '050-copy'
-					}
+				startExport() {
+					this.ffmpegState = 'RUNNING'
+					let data = new FormData()
+					data.set('dir', this.selMnt)
+					axios.post('/export/start', data)
+				},
+
+				shutdown() {
+					axios.post('/copy/shutdown')
 				}
 			}
 		})

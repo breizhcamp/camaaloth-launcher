@@ -7,6 +7,7 @@ import org.breizhcamp.camaalothlauncher.dto.Speaker
 import org.breizhcamp.camaalothlauncher.dto.State
 import org.breizhcamp.camaalothlauncher.dto.TalkConf
 import org.breizhcamp.camaalothlauncher.dto.TalkSession
+import org.breizhcamp.camaalothlauncher.services.recorder.RecorderType
 import org.springframework.stereotype.Service
 import java.io.File
 import java.nio.file.Files
@@ -43,7 +44,10 @@ class TalkConfSrv(private val objectMapper: ObjectMapper, private val props: Cam
         state.currentTalk = talkConfToSession(t)
 
         val recordingPath = buildVideoDirName(t)
-        state.recordingPath = Paths.get(props.recordingDir, recordingPath).toAbsolutePath()
+        val recordingPathTalk = Paths.get(props.recordingDir, recordingPath).toAbsolutePath()
+        state.recordingPath = recordingPathTalk
+
+        talkSrv.defineOBSRecordingDir(recordingPathTalk)
 
         val preview = state.previewDir() ?: return
         if (Files.notExists(preview)) {

@@ -1,29 +1,37 @@
 package org.breizhcamp.camaalothlauncher.controller
 
-import org.breizhcamp.camaalothlauncher.dto.ExportStart
+import org.breizhcamp.camaalothlauncher.dto.ExportInfos
 import org.breizhcamp.camaalothlauncher.dto.State
 import org.breizhcamp.camaalothlauncher.services.ConvertSrv
 import org.breizhcamp.camaalothlauncher.services.FilesSrv
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.breizhcamp.camaalothlauncher.services.TalkSrv
+import org.springframework.web.bind.annotation.*
 import java.io.InputStream
+import java.nio.file.Path
 import java.time.Duration
 
 /**
- * Controller for 040-export
+ * Controller for 030-export
  */
 @RestController @RequestMapping("/export")
-class ExportCtrl(private val state: State, private val convertSrv: ConvertSrv, private val filesSrv: FilesSrv) {
+class ExportCtrl(
+    private val state: State,
+    private val convertSrv: ConvertSrv,
+    private val filesSrv: FilesSrv,
+    private val talkSrv: TalkSrv,
+) {
+
+    @GetMapping("/infos")
+    fun infos(): ExportInfos {
+        return ExportInfos(filesSrv.videoFileLength(state.filesToExport), filesSrv.filesSize(state.filesToExport))
+    }
 
     @PostMapping("/start")
-    fun start(): ExportStart {
-        val recordingPath = state.recordingPath ?: return ExportStart(Duration.ZERO, 0)
-
-        val sizes = filesSrv.filesSize(state.filesToExport);
-        val length = convertSrv.startConvert(recordingPath, state.filesToExport)
-
-        return ExportStart(length, sizes)
+    fun start(@RequestParam dir: String) {
+        val recordingPath = state.recordingPath ?: return
+        val destDir = Path.of(dir, "videos", recordingPath.fileName.toString())
+        talkSrv.copyMetadataToDest(destDir, state)
+        convertSrv.startConvert(destDir, recordingPath, state.filesToExport)
     }
 
     /**

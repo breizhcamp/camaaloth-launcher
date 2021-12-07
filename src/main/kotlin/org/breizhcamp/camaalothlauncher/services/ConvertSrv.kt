@@ -11,6 +11,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
 import java.io.InputStream
 import java.io.UncheckedIOException
+import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Duration
 import java.time.LocalDateTime
@@ -35,26 +36,27 @@ class ConvertSrv(private val msgTpl: SimpMessagingTemplate, private val filesSrv
     /**
      * Start conversion for selected files
      */
-    fun startConvert(destPath: Path, filesToConvert: List<Path>) : Duration {
-        if (filesToConvert.isEmpty()) return Duration.ZERO
-        val duration = videoFileLength(filesToConvert)
+    fun startConvert(destPath: Path, srcPath: Path, filesToConvert: List<Path>) {
+        if (filesToConvert.isEmpty()) return
+        if (Files.notExists(destPath)) Files.createDirectories(destPath)
+
+        val destFile = destPath.resolve("export.mp4")
+        Files.deleteIfExists(destFile)
 
         val inputArgs = if (filesToConvert.size == 1) {
             listOf("-i", "file:${filesToConvert[0]}")
         } else {
-            destPath.resolve("concat.txt").toFile()
+            srcPath.resolve("concat.txt").toFile()
                     .writeText(filesToConvert.map { "file 'file:${it.fileName}'" }.joinToString("\n"))
             listOf("-f", "concat", "-safe", "0", "-i", "concat.txt")
         }
 
         val cmd = mutableListOf("ffmpeg", "-n", "-progress", "http://localhost:$httpPort/export/progress")
         cmd.addAll(inputArgs)
-        cmd.addAll(listOf("-c:v", "copy", "-c:a", "aac", "-b:a", "384k", "-profile:a", "aac_low", "export.mp4"))
+        cmd.addAll(listOf("-c:v", "copy", "-c:a", "aac", "-b:a", "384k", "-profile:a", "aac_low", destFile.toString()))
 
-        val logFile = destPath.resolve(logDateFormater.format(LocalDateTime.now()) + "_ffmpeg.log")
-        LongCmdRunner("ffmpeg", cmd, destPath, logFile, msgTpl, "/040-ffmpeg-export-out").start()
-
-        return duration
+        val logFile = srcPath.resolve(logDateFormater.format(LocalDateTime.now()) + "_ffmpeg.log")
+        LongCmdRunner("ffmpeg", cmd, destPath, logFile, msgTpl, "/030-ffmpeg-export-out").start()
     }
 
     /**
@@ -71,7 +73,7 @@ class ConvertSrv(private val msgTpl: SimpMessagingTemplate, private val filesSrv
 
                     if (line.startsWith("progress=") && curMsg.size > 0) {
                         val progress = FFMpegProgress.build(curMsg)
-                        msgTpl.convertAndSend("/040-ffmpeg-export-progress", progress)
+                        msgTpl.convertAndSend("/030-ffmpeg-export-progress", progress)
                         curMsg.clear()
                     }
                 }
@@ -80,16 +82,5 @@ class ConvertSrv(private val msgTpl: SimpMessagingTemplate, private val filesSrv
                 logger.info { "FFMpeg has terminated the progress \"a l'arrache\"" }
             }
         }
-    }
-
-    /**
-     * Compute the length of several video files
-     */
-    private fun videoFileLength(files: List<Path>) : Duration = runBlocking(IO) {
-        val defered = files.map { f ->
-            async { filesSrv.fileDuration(f) }
-        }
-
-        defered.fold(Duration.ZERO) { acc, d -> acc + d.await() }
     }
 }

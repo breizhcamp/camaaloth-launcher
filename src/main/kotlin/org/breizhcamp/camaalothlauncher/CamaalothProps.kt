@@ -45,6 +45,9 @@ class CamaalothProps {
     @ConstructorBinding
     class Obs {
         val startCmd = listOf("obs")
+        /** For now, we cannot change OBS record dir, so we create a symbolic link between this directory and the talk dir */
+        val configuredRecordingDir: String = "videos/records"
+
         /** URL of websocket-obs */
         val wsUrl = "ws://localhost:4444"
         /** Password of websocket-obs */

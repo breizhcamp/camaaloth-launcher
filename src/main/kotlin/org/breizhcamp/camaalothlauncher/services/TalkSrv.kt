@@ -1,20 +1,25 @@
 package org.breizhcamp.camaalothlauncher.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import mu.KotlinLogging
 import org.apache.commons.lang3.StringUtils
 import org.breizhcamp.camaalothlauncher.CamaalothProps
 import org.breizhcamp.camaalothlauncher.dto.State
 import org.breizhcamp.camaalothlauncher.dto.TalkSession
+import org.breizhcamp.camaalothlauncher.services.recorder.RecorderType
 import org.springframework.stereotype.Service
 import java.io.File
 import java.io.FileNotFoundException
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption.COPY_ATTRIBUTES
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.time.LocalDate
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Manage Talk Data (zip...)
@@ -62,14 +67,34 @@ class TalkSrv(private val objectMapper: ObjectMapper, private val props: Camaalo
         state.currentTalk = t
 
         val dirName = LocalDate.now().toString() + " - " + t.talk + " - " + t.speakers.joinToString(" -") { it.name }
-        state.recordingPath = Paths.get(props.recordingDir, cleanForFilename(dirName)).toAbsolutePath()
+        val recordingPathTalk = Paths.get(props.recordingDir, cleanForFilename(dirName))
+        state.recordingPath = recordingPathTalk.toAbsolutePath()
 
+        defineOBSRecordingDir(recordingPathTalk)
         createCurrentTalkDirAndCopyInfos(zipFile, state)
         extractImagesToThemeDir(zipFile)
     }
 
+    fun defineOBSRecordingDir(recordingPathTalk: Path) {
+        if (props.recorder != RecorderType.OBS) return
+
+        // For now, we cannot change OBS record dir, so we create a symbolic link between this directory and the talk dir
+        val obsRecord = Paths.get(props.obs.configuredRecordingDir).toAbsolutePath()
+        if (Files.isSymbolicLink(obsRecord)) Files.delete(obsRecord)
+        Files.createSymbolicLink(obsRecord, recordingPathTalk.toAbsolutePath())
+    }
+
     fun cleanForFilename(str: String) =
             StringUtils.stripAccents(str).replace(Regex("[\\\\/:*?\"<>|]"), "-").replace(Regex("[^A-Za-z0-9,\\-\\\\ ]"), "")
+
+    fun copyMetadataToDest(destDir: Path, state: State) {
+        val src = state.recordingPath?.resolve("infos.ug.zip") ?: return
+        if (Files.notExists(destDir)) Files.createDirectories(destDir)
+        val dest = destDir.resolve("infos.ug.zip")
+
+        logger.info { "Copying metadata from [$src] to [$dest]" }
+        Files.copy(src, dest, REPLACE_EXISTING, COPY_ATTRIBUTES)
+    }
 
     /** Create directory for current dir */
     private fun createCurrentTalkDirAndCopyInfos(zipFile: String, state: State) {

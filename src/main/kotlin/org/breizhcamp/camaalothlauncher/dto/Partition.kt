@@ -6,9 +6,9 @@ package org.breizhcamp.camaalothlauncher.dto
 data class Partition(
         val mountpoint: String,
         val deviceName: String,
-        val label: String?,
-        val model: String?,
-        val vendor: String?,
-        val size: String?,
+        val label: String? = "",
+        val model: String? = "",
+        val vendor: String? = "",
+        val size: String? = "",
         var spaceLeft: Long? = 0
 )
