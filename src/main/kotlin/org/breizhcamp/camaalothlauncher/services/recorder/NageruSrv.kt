@@ -26,7 +26,7 @@ class NageruSrv(private val props: CamaalothProps, private val msgTpl: SimpMessa
 
         val cmd = listOf("/bin/bash", startScript, "-r", recordingDir.toAbsolutePath().toString())
         val logFile = recordingDir.resolve(logDateFormater.format(LocalDateTime.now()) + "_nageru.log")
-        val runDir = Paths.get(props.nageru.themeDir)
+        val runDir = Paths.get(props.themeDir)
 
         hooks.forEach { it.preRecord(preview) }
 

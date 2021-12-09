@@ -112,7 +112,7 @@ class TalkSrv(private val objectMapper: ObjectMapper, private val props: Camaalo
 
     /** Extract all png in [zipFile] into themes/images dir */
     private fun extractImagesToThemeDir(zipFile: String) {
-        val imagesDir = Paths.get(props.nageru.themeDir, "images")
+        val imagesDir = Paths.get(props.themeDir, "images")
         val imgDirFile = imagesDir.toFile()
 
         if (Files.exists(imagesDir)) imgDirFile.deleteRecursively()
