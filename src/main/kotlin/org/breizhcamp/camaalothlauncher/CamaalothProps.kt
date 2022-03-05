@@ -29,6 +29,9 @@ data class CamaalothProps(
     /** Do we show the systray or not */
     val systray: Boolean = true,
 
+    /** Do we start the user browser when the application starts */
+    val startBrowserOnStartup: Boolean = false,
+
     /** Name of Akai in midi list */
     val akaiName: String? = null,
 

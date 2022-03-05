@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service
 import java.io.IOException
 import java.net.URL
 import java.util.*
+import kotlin.system.exitProcess
 
 private val logger = KotlinLogging.logger {}
 
@@ -19,10 +20,9 @@ private val logger = KotlinLogging.logger {}
 @Service
 class Systray(private val props: CamaalothProps): ApplicationListener<ServletWebServerInitializedEvent> {
 
-    private var httpPort = 0
-
     override fun onApplicationEvent(event: ServletWebServerInitializedEvent) {
-        httpPort = event.source.port
+        val url = "http://localhost:${event.source.port}"
+        if (props.startBrowserOnStartup) startBrowser(url)
 
         if (!props.systray) return
         val systray = SystemTray.get() ?: return logger.warn("System is not handling systray")
@@ -32,8 +32,8 @@ class Systray(private val props: CamaalothProps): ApplicationListener<ServletWeb
 
         val mainMenu = systray.menu
 
-        mainMenu.add(MenuItem("Ouvrir") { startBrowser("http://localhost:$httpPort") })
-        mainMenu.add(MenuItem("Quitter") { System.exit(0) })
+        mainMenu.add(MenuItem("Ouvrir") { startBrowser(url) })
+        mainMenu.add(MenuItem("Quitter") { exitProcess(0) })
     }
 
     /**
@@ -54,13 +54,13 @@ class Systray(private val props: CamaalothProps): ApplicationListener<ServletWeb
         var commands: Array<String>? = null
 
         //start browser depending the operating system
-        if (os.indexOf("win") >= 0) {
+        if (os.contains("win")) {
             commands = arrayOf("cmd", "/c", "start", url)
 
-        } else if (os.indexOf("nux") >= 0) {
+        } else if (os.contains("nux")) {
             commands = arrayOf("xdg-open", url)
 
-        } else if (os.indexOf("mac") >= 0) {
+        } else if (os.contains("mac")) {
             commands = arrayOf("open", url)
         }
 
