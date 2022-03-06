@@ -32,14 +32,27 @@ data class CamaalothProps(
     /** Do we start the user browser when the application starts */
     val startBrowserOnStartup: Boolean = false,
 
-    /** Name of Akai in midi list */
-    val akaiName: String? = null,
-
+    val midi: Midi = Midi(),
     val recorder: RecorderType = RecorderType.OBS,
     val nageru: Nageru = Nageru(),
     val obs: Obs = Obs(),
     val breizhcamp: BreizhCamp = BreizhCamp(),
 ) {
+
+    @ConstructorBinding
+    data class Midi(
+        /** Enable or disable Midi controls */
+        val enabled: Boolean = true,
+
+        /** Number of seconds to delay the start of midi connection, used to wait startup of other components (Jack...) */
+        val startDelaySec: Long = 0,
+
+        /** Name of Akai in midi list */
+        val akaiName: String? = null,
+
+        /** Name of XIAO (Camaaloth buttons) in midi list */
+        val xiaoName: String = "XIAO",
+    )
 
     @ConstructorBinding
     data class Nageru (

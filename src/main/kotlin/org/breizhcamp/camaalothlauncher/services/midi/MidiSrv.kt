@@ -10,6 +10,8 @@ import org.breizhcamp.camaalothlauncher.services.midi.MidiSrv.MidiWay.*
 import org.breizhcamp.camaalothlauncher.services.recorder.RecorderType
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
 import javax.sound.midi.MidiDevice
@@ -33,39 +35,49 @@ class MidiSrv(
     private val transmittingDevices = ArrayList<Pair<MidiDevice, MidiSendController>>()
 
     override fun preRecord(preview: Boolean) {
-        if (props.recorder != RecorderType.NAGERU) return;
+        if (!props.midi.enabled) return
+        if (props.recorder != RecorderType.NAGERU) return
         disconnect()
     }
 
     override fun postRecord(preview: Boolean) {
-        if (props.recorder != RecorderType.NAGERU) return;
+        if (!props.midi.enabled) return
+        if (props.recorder != RecorderType.NAGERU) return
         connect()
+    }
+
+    @PostConstruct
+    fun setup() {
+        if (!props.midi.enabled) return
+        val executors = Executors.newSingleThreadScheduledExecutor()
+        executors.schedule(::connect, props.midi.startDelaySec, TimeUnit.SECONDS)
     }
 
     @PreDestroy
     fun shutdown() {
+        if (!props.midi.enabled) return
         disconnect()
     }
 
-    fun list(): String {
-        val infos = MidiSystem.getMidiDeviceInfo()
-        return infos.joinToString("\n") { info ->
+    fun list(infos: Array<MidiDevice.Info>?): String {
+        val infosR = infos ?: MidiSystem.getMidiDeviceInfo()
+        return infosR.joinToString("\n") { info ->
             val ways = getMidiWays(MidiSystem.getMidiDevice(info)).joinToString { it.label }
+
             " - ${info.name}: $ways"
         }
     }
 
-    @PostConstruct
-    fun connect() {
-        logger.info { "[MIDI] Connecting devices" }
+    private fun connect() {
+        logger.info { "[MIDI] Connecting devices..." }
         val infos = MidiSystem.getMidiDeviceInfo()
 
-        logger.info { "[MIDI] Devices list: " + infos.joinToString { it.name } }
+        logger.info { "[MIDI] Devices list:\n" + list(infos) }
 
         for (info in infos) {
-            logger.debug { "[MIDI] Device ${info.name}" }
             val device = MidiSystem.getMidiDevice(info)
             val ways = getMidiWays(device)
+            logger.info { "[MIDI] Checking device ${info.name} for: " + ways.joinToString { it.label } }
 
             val receivers = receiveCtrls.filter { it.handle(device, info) }
 
@@ -104,8 +116,11 @@ class MidiSrv(
     }
 
     private fun disconnect() {
-        logger.info { "[MIDI] Disconnecting all ${receivingDevices.size} devices" }
-        transmittingDevices.forEach { (device, ctrl) -> ctrl.close().forEach { device.receiver.send(it, -1) } }
+        logger.info { "[MIDI] Disconnecting ${transmittingDevices.size} transmitting devices and ${receivingDevices.size} receiving devices" }
+        transmittingDevices.forEach { (device, ctrl) ->
+            ctrl.close().forEach { device.receiver.send(it, -1) }
+            device.close()
+        }
 
         receivingDevices.filter(MidiDevice::isOpen).forEach(MidiDevice::close)
         receivingDevices.clear()

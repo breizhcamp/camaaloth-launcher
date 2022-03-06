@@ -15,7 +15,7 @@ import javax.sound.midi.ShortMessage
 class AkaiMPD218MidiCtrl(private val props: CamaalothProps): MidiReceiveController {
 
     override fun handle(device: MidiDevice, info: MidiDevice.Info): Boolean {
-        val name = props.akaiName ?: return false
+        val name = props.midi.akaiName ?: return false
         return info.name.contains(name)
     }
 

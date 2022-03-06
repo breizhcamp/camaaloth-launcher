@@ -1,5 +1,6 @@
 package org.breizhcamp.camaalothlauncher.services.midi
 
+import org.breizhcamp.camaalothlauncher.CamaalothProps
 import org.breizhcamp.camaalothlauncher.dto.*
 import org.breizhcamp.camaalothlauncher.dto.PadMsg.PadAction
 import org.breizhcamp.camaalothlauncher.dto.PadMsg.PadType
@@ -9,9 +10,9 @@ import javax.sound.midi.MidiMessage
 import javax.sound.midi.ShortMessage
 
 @Service
-class CamaalothButtonsReceiver: MidiReceiveController, MidiSendController {
+class CamaalothButtonsReceiver(private val props: CamaalothProps): MidiReceiveController, MidiSendController {
     override fun handle(device: MidiDevice, info: MidiDevice.Info): Boolean {
-        return info.name.contains("XIAO")
+        return info.name.contains(props.midi.xiaoName)
     }
 
     override fun event(status: Int, bank: Int, msg: ByteArray): PadMsg {
